@@ -12,32 +12,112 @@ import {
   Flag,
   Server,
   Globe,
-  Plug,
-  Network,
   Terminal,
   AppWindow,
   Smartphone,
-  Cloud,
-  EyeOff,
-  Radio,
   ShieldOff,
   Anchor,
-  Fish,
   Users,
+  Network,
   Radar,
-  PawPrint,
-  Package,
+  KeyRound,
+  FileCode,
   SquareTerminal,
-  Hash,
   Code,
   Microscope,
   FlaskConical,
   GitFork,
-  ScanSearch,
   ShieldCheck,
-  FileCode,
   type LucideIcon,
 } from "lucide-react"
+
+export type Accent = "red" | "emerald" | "sky" | "amber" | "cyan" | "fuchsia"
+
+export interface AccentTheme {
+  /** Color de texto para el acento del título y los iconos. */
+  text: string
+  /** Gradiente de fondo del hero. */
+  heroGradient: string
+  /** Clases del botón CTA. */
+  button: string
+  /** Contenedor del icono (fondo + borde). */
+  iconBox: string
+  /** Borde de la tarjeta al hacer hover. */
+  cardHover: string
+  /** Fondo del icono al hacer hover dentro de una tarjeta. */
+  iconHoverBg: string
+  /** Sombra/glow al hacer hover. */
+  glow: string
+  /** Color de fondo para puntos/acentos pequeños. */
+  dot: string
+}
+
+/**
+ * Mapa de temas por acento. Se definen como strings literales completos
+ * para que Tailwind los detecte en el escaneo de clases.
+ */
+export const accentThemes: Record<Accent, AccentTheme> = {
+  red: {
+    text: "text-red-500",
+    heroGradient: "from-red-900/25 via-gray-950 to-black",
+    button: "bg-red-600 hover:bg-red-700 text-white",
+    iconBox: "bg-red-600/10 border-red-600/30",
+    cardHover: "hover:border-red-500/70",
+    iconHoverBg: "group-hover:bg-red-600/20",
+    glow: "group-hover:shadow-red-600/20",
+    dot: "bg-red-500",
+  },
+  emerald: {
+    text: "text-emerald-500",
+    heroGradient: "from-emerald-900/25 via-gray-950 to-black",
+    button: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    iconBox: "bg-emerald-600/10 border-emerald-600/30",
+    cardHover: "hover:border-emerald-500/70",
+    iconHoverBg: "group-hover:bg-emerald-600/20",
+    glow: "group-hover:shadow-emerald-600/20",
+    dot: "bg-emerald-500",
+  },
+  sky: {
+    text: "text-sky-500",
+    heroGradient: "from-sky-900/25 via-gray-950 to-black",
+    button: "bg-sky-600 hover:bg-sky-700 text-white",
+    iconBox: "bg-sky-600/10 border-sky-600/30",
+    cardHover: "hover:border-sky-500/70",
+    iconHoverBg: "group-hover:bg-sky-600/20",
+    glow: "group-hover:shadow-sky-600/20",
+    dot: "bg-sky-500",
+  },
+  amber: {
+    text: "text-amber-500",
+    heroGradient: "from-amber-900/25 via-gray-950 to-black",
+    button: "bg-amber-500 hover:bg-amber-600 text-black",
+    iconBox: "bg-amber-500/10 border-amber-500/30",
+    cardHover: "hover:border-amber-500/70",
+    iconHoverBg: "group-hover:bg-amber-500/20",
+    glow: "group-hover:shadow-amber-500/20",
+    dot: "bg-amber-500",
+  },
+  cyan: {
+    text: "text-cyan-400",
+    heroGradient: "from-cyan-900/25 via-gray-950 to-black",
+    button: "bg-cyan-500 hover:bg-cyan-600 text-black",
+    iconBox: "bg-cyan-500/10 border-cyan-500/30",
+    cardHover: "hover:border-cyan-400/70",
+    iconHoverBg: "group-hover:bg-cyan-500/20",
+    glow: "group-hover:shadow-cyan-500/20",
+    dot: "bg-cyan-400",
+  },
+  fuchsia: {
+    text: "text-fuchsia-500",
+    heroGradient: "from-fuchsia-900/25 via-gray-950 to-black",
+    button: "bg-fuchsia-600 hover:bg-fuchsia-700 text-white",
+    iconBox: "bg-fuchsia-600/10 border-fuchsia-600/30",
+    cardHover: "hover:border-fuchsia-500/70",
+    iconHoverBg: "group-hover:bg-fuchsia-600/20",
+    glow: "group-hover:shadow-fuchsia-600/20",
+    dot: "bg-fuchsia-500",
+  },
+}
 
 export interface SubSection {
   name: string
@@ -52,6 +132,12 @@ export interface Section {
   href: string
   description: string
   icon: LucideIcon
+  /** Color de acento de la sección. */
+  accent?: Accent
+  /** Palabra/sufijo en blanco que acompaña al título de dos tonos. */
+  heroSuffix?: string
+  /** Etiqueta del botón principal del hero. */
+  ctaLabel?: string
   subsections?: SubSection[]
 }
 
@@ -69,6 +155,7 @@ export const sections: Section[] = [
     href: "/",
     description: "Página principal de BUSA Cybersecurity.",
     icon: Home,
+    accent: "red",
   },
   {
     name: "Writeups",
@@ -77,11 +164,14 @@ export const sections: Section[] = [
     description:
       "Resoluciones detalladas de máquinas, retos y plataformas de hacking, junto con cheatsheets de referencia rápida.",
     icon: FileText,
+    accent: "sky",
+    heroSuffix: "& Soluciones",
+    ctaLabel: "Ver Writeups",
     subsections: [
       { name: "Hack The Box", slug: "hack-the-box", description: "Writeups de máquinas y retos de HTB.", icon: Box },
-      { name: "Cheatsheets", slug: "cheatsheets", description: "Hojas de referencia rápida y comandos clave.", icon: ScrollText },
       { name: "TryHackMe", slug: "tryhackme", description: "Resoluciones de salas y rutas de THM.", icon: Flag },
       { name: "VulnHub", slug: "vulnhub", description: "Soluciones de máquinas vulnerables de VulnHub.", icon: Server },
+      { name: "Cheatsheets", slug: "cheatsheets", description: "Hojas de referencia rápida y comandos clave.", icon: ScrollText },
     ],
   },
   {
@@ -89,16 +179,16 @@ export const sections: Section[] = [
     slug: "pentesting",
     href: "/pentesting",
     description:
-      "Metodologías y técnicas de pruebas de penetración organizadas por dominio: web, APIs, redes y sistemas operativos.",
+      "Metodologías y técnicas de pruebas de penetración organizadas por dominio: web, sistemas operativos y móviles.",
     icon: Crosshair,
+    accent: "amber",
+    heroSuffix: "Offensive",
+    ctaLabel: "Explorar Técnicas",
     subsections: [
       { name: "Seguridad Web", slug: "seguridad-web", description: "OWASP, vulnerabilidades web y explotación.", icon: Globe },
-      { name: "Seguridad de APIs", slug: "seguridad-apis", description: "Pruebas y abuso de APIs REST y GraphQL.", icon: Plug },
-      { name: "Active Directory", slug: "active-directory", description: "Enumeración y ataques en entornos AD.", icon: Network },
       { name: "Linux", slug: "linux", description: "Escalada de privilegios y hardening en Linux.", icon: Terminal },
       { name: "Windows", slug: "windows", description: "Técnicas de explotación y privesc en Windows.", icon: AppWindow },
       { name: "Mobile", slug: "mobile", description: "Pentesting de aplicaciones Android e iOS.", icon: Smartphone },
-      { name: "Cloud", slug: "cloud", description: "Seguridad ofensiva en AWS, Azure y GCP.", icon: Cloud },
     ],
   },
   {
@@ -106,14 +196,14 @@ export const sections: Section[] = [
     slug: "red-team",
     href: "/red-team",
     description:
-      "Operaciones ofensivas avanzadas: sigilo, comando y control, evasión, persistencia e ingeniería social.",
+      "Operaciones ofensivas avanzadas: evasión de defensas, persistencia, ingeniería social y ataques sobre Active Directory.",
     icon: Swords,
+    accent: "red",
+    heroSuffix: "Operations",
+    ctaLabel: "Explorar Técnicas",
     subsections: [
-      { name: "OPSEC", slug: "opsec", description: "Seguridad operacional para operaciones ofensivas.", icon: EyeOff },
-      { name: "Command & Control (C2)", slug: "c2", description: "Infraestructura y frameworks de C2.", icon: Radio },
       { name: "Evasión de defensas", slug: "evasion", description: "Bypass de EDR, AV y mecanismos de detección.", icon: ShieldOff },
       { name: "Persistencia", slug: "persistencia", description: "Técnicas para mantener el acceso.", icon: Anchor },
-      { name: "Phishing", slug: "phishing", description: "Campañas y pretextos de phishing.", icon: Fish },
       { name: "Ingeniería Social", slug: "ingenieria-social", description: "Manipulación del factor humano.", icon: Users },
       { name: "Active Directory Avanzado", slug: "active-directory-avanzado", description: "Ataques avanzados sobre AD.", icon: Network },
     ],
@@ -124,13 +214,14 @@ export const sections: Section[] = [
     href: "/herramientas",
     description: "Guías y notas de uso de las herramientas esenciales del arsenal ofensivo.",
     icon: Wrench,
+    accent: "emerald",
+    heroSuffix: "Arsenal",
+    ctaLabel: "Explorar Arsenal",
     subsections: [
       { name: "Burp Suite", slug: "burp-suite", description: "Proxy y análisis de aplicaciones web.", icon: Bug },
       { name: "Nmap", slug: "nmap", description: "Escaneo de red y descubrimiento de servicios.", icon: Radar },
-      { name: "BloodHound", slug: "bloodhound", description: "Análisis de rutas de ataque en AD.", icon: PawPrint },
-      { name: "Impacket", slug: "impacket", description: "Colección de scripts para protocolos de red.", icon: Package },
-      { name: "NetExec", slug: "netexec", description: "Post-explotación y movimiento lateral.", icon: SquareTerminal },
       { name: "Metasploit", slug: "metasploit", description: "Framework de explotación y payloads.", icon: Crosshair },
+      { name: "John the Ripper", slug: "john-the-ripper", description: "Cracking de contraseñas y hashes.", icon: KeyRound },
     ],
   },
   {
@@ -139,11 +230,13 @@ export const sections: Section[] = [
     href: "/programacion",
     description: "Lenguajes y scripting aplicados a la seguridad ofensiva y la automatización.",
     icon: Code2,
+    accent: "cyan",
+    heroSuffix: "& Scripting",
+    ctaLabel: "Ver Lenguajes",
     subsections: [
       { name: "Python", slug: "python", description: "Scripting ofensivo y automatización.", icon: FileCode },
       { name: "Bash", slug: "bash", description: "Automatización y scripting en Linux.", icon: SquareTerminal },
       { name: "PowerShell", slug: "powershell", description: "Scripting y ofensiva en Windows.", icon: Terminal },
-      { name: "C#", slug: "csharp", description: "Desarrollo de herramientas para .NET.", icon: Hash },
       { name: "Go", slug: "go", description: "Tooling rápido y multiplataforma.", icon: Code },
     ],
   },
@@ -152,13 +245,15 @@ export const sections: Section[] = [
     slug: "malware",
     href: "/malware",
     description:
-      "Análisis, desarrollo educativo y detección de malware, incluyendo ingeniería inversa y reglas YARA.",
+      "Análisis, desarrollo educativo y detección de malware, incluyendo ingeniería inversa y estrategias de detección.",
     icon: Bug,
+    accent: "fuchsia",
+    heroSuffix: "Research",
+    ctaLabel: "Explorar Research",
     subsections: [
       { name: "Análisis de malware", slug: "analisis", description: "Análisis estático y dinámico de muestras.", icon: Microscope },
       { name: "Desarrollo de malware", slug: "desarrollo", description: "Desarrollo con fines educativos y de investigación.", icon: FlaskConical },
       { name: "Ingeniería inversa", slug: "ingenieria-inversa", description: "Reverse engineering de binarios.", icon: GitFork },
-      { name: "Reglas YARA", slug: "yara", description: "Creación de reglas de detección YARA.", icon: ScanSearch },
       { name: "Técnicas de detección", slug: "deteccion", description: "Indicadores y estrategias de detección.", icon: ShieldCheck },
     ],
   },
@@ -168,8 +263,14 @@ export const sections: Section[] = [
     href: "/sobre-mi",
     description: "Perfil profesional, habilidades, certificaciones y experiencia.",
     icon: User,
+    accent: "red",
   },
 ]
+
+/** Devuelve el tema de acento de una sección (rojo por defecto). */
+export function getAccent(section?: Section): AccentTheme {
+  return accentThemes[section?.accent ?? "red"]
+}
 
 /** Devuelve una sección por su slug. */
 export function getSection(slug: string): Section | undefined {
