@@ -4,7 +4,8 @@ import type { Metadata } from "next"
 import { ChevronRight, FileText } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { sections, getSubSection } from "@/lib/navigation"
+import { sections, getSubSection, getAccent } from "@/lib/navigation"
+import { cn } from "@/lib/utils"
 
 export function generateStaticParams() {
   return sections.flatMap((section) =>
@@ -41,6 +42,7 @@ export default async function SubSectionPage({
     notFound()
   }
 
+  const accent = getAccent(section)
   const Icon = subsection.icon
 
   return (
@@ -48,15 +50,17 @@ export default async function SubSectionPage({
       <SiteHeader />
 
       {/* Hero */}
-      <section className="py-16 px-4 bg-gradient-to-br from-red-900/20 via-gray-950 to-black border-b border-gray-800">
+      <section
+        className={cn("border-b border-gray-800 px-4 py-16 bg-gradient-to-br", accent.heroGradient)}
+      >
         <div className="container mx-auto">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-400 mb-6" aria-label="Migas de pan">
-            <Link href="/" className="hover:text-red-400 transition-colors">
+            <Link href="/" className={cn("transition-colors", accent.titleHover)}>
               Inicio
             </Link>
             <ChevronRight className="h-4 w-4" />
-            <Link href={section.href} className="hover:text-red-400 transition-colors">
+            <Link href={section.href} className={cn("transition-colors", accent.titleHover)}>
               {section.name}
             </Link>
             <ChevronRight className="h-4 w-4" />
@@ -64,8 +68,10 @@ export default async function SubSectionPage({
           </nav>
 
           <div className="flex items-center gap-3 mb-4">
-            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-600/10 border border-red-600/30">
-              <Icon className="h-6 w-6 text-red-500" />
+            <span
+              className={cn("flex h-12 w-12 items-center justify-center rounded-lg border", accent.iconBox)}
+            >
+              <Icon className={cn("h-6 w-6", accent.text)} />
             </span>
             <h1 className="text-4xl md:text-5xl font-bold text-white">{subsection.name}</h1>
           </div>
@@ -81,7 +87,7 @@ export default async function SubSectionPage({
             <h2 className="text-xl font-semibold text-white mb-2">Aún no hay artículos publicados</h2>
             <p className="text-gray-400 max-w-md">
               Esta categoría está lista para recibir contenido. Pronto encontrarás aquí writeups, notas y guías sobre{" "}
-              <span className="text-red-400">{subsection.name}</span>.
+              <span className={accent.text}>{subsection.name}</span>.
             </p>
           </div>
         </div>

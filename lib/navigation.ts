@@ -50,6 +50,8 @@ export interface AccentTheme {
   glow: string
   /** Color de fondo para puntos/acentos pequeños. */
   dot: string
+  /** Color del título de la tarjeta al hacer hover (clase literal group-hover). */
+  titleHover: string
 }
 
 /**
@@ -66,6 +68,7 @@ export const accentThemes: Record<Accent, AccentTheme> = {
     iconHoverBg: "group-hover:bg-red-600/20",
     glow: "group-hover:shadow-red-600/20",
     dot: "bg-red-500",
+    titleHover: "group-hover:text-red-400",
   },
   emerald: {
     text: "text-emerald-500",
@@ -76,6 +79,7 @@ export const accentThemes: Record<Accent, AccentTheme> = {
     iconHoverBg: "group-hover:bg-emerald-600/20",
     glow: "group-hover:shadow-emerald-600/20",
     dot: "bg-emerald-500",
+    titleHover: "group-hover:text-emerald-400",
   },
   sky: {
     text: "text-sky-500",
@@ -86,6 +90,7 @@ export const accentThemes: Record<Accent, AccentTheme> = {
     iconHoverBg: "group-hover:bg-sky-600/20",
     glow: "group-hover:shadow-sky-600/20",
     dot: "bg-sky-500",
+    titleHover: "group-hover:text-sky-400",
   },
   amber: {
     text: "text-amber-500",
@@ -96,6 +101,7 @@ export const accentThemes: Record<Accent, AccentTheme> = {
     iconHoverBg: "group-hover:bg-amber-500/20",
     glow: "group-hover:shadow-amber-500/20",
     dot: "bg-amber-500",
+    titleHover: "group-hover:text-amber-400",
   },
   cyan: {
     text: "text-cyan-400",
@@ -106,6 +112,7 @@ export const accentThemes: Record<Accent, AccentTheme> = {
     iconHoverBg: "group-hover:bg-cyan-500/20",
     glow: "group-hover:shadow-cyan-500/20",
     dot: "bg-cyan-400",
+    titleHover: "group-hover:text-cyan-300",
   },
   fuchsia: {
     text: "text-fuchsia-500",
@@ -116,6 +123,7 @@ export const accentThemes: Record<Accent, AccentTheme> = {
     iconHoverBg: "group-hover:bg-fuchsia-600/20",
     glow: "group-hover:shadow-fuchsia-600/20",
     dot: "bg-fuchsia-500",
+    titleHover: "group-hover:text-fuchsia-400",
   },
 }
 

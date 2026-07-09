@@ -5,7 +5,9 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { ArrowRight, FolderOpen } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { sections, getSection } from "@/lib/navigation"
+import { SectionTerminal } from "@/components/section-terminal"
+import { sections, getSection, getAccent } from "@/lib/navigation"
+import { cn } from "@/lib/utils"
 
 // Slugs que tienen su propia página dedicada y no deben usar esta ruta dinámica.
 const RESERVED = new Set(["inicio", "sobre-mi"])
@@ -40,7 +42,7 @@ export default async function SectionPage({
     notFound()
   }
 
-  const Icon = section.icon
+  const accent = getAccent(section)
   const subsections = section.subsections ?? []
 
   return (
@@ -48,40 +50,92 @@ export default async function SectionPage({
       <SiteHeader />
 
       {/* Hero */}
-      <section className="py-16 px-4 bg-gradient-to-br from-red-900/20 via-gray-950 to-black border-b border-gray-800">
-        <div className="container mx-auto">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-600/10 border border-red-600/30">
-                <Icon className="h-6 w-6 text-red-500" />
-              </span>
-              <h1 className="text-4xl md:text-5xl font-bold text-white">{section.name}</h1>
+      <section
+        className={cn(
+          "relative overflow-hidden border-b border-gray-800 px-4 py-20 bg-gradient-to-br",
+          accent.heroGradient,
+        )}
+      >
+        {/* Rejilla decorativa de fondo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
+          }}
+        />
+        <div className="container relative mx-auto text-center">
+          <h1 className="text-4xl md:text-6xl font-bold text-balance">
+            <span className={accent.text}>{section.name}</span>{" "}
+            {section.heroSuffix && <span className="text-white">{section.heroSuffix}</span>}
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-gray-300 leading-relaxed text-pretty">
+            {section.description}
+          </p>
+
+          {subsections.length > 0 && (
+            <div className="mt-8 flex justify-center">
+              <a
+                href="#categorias"
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-colors",
+                  accent.button,
+                )}
+              >
+                {section.ctaLabel ?? "Explorar"}
+                <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
-            <p className="text-lg text-gray-300 leading-relaxed text-pretty">{section.description}</p>
-          </div>
+          )}
+
+          {/* Elemento innovador: terminal animada temática */}
+          {subsections.length > 0 && (
+            <div className="mt-12">
+              <SectionTerminal
+                moduleName={section.name}
+                items={subsections.map((s) => s.name)}
+                accentText={accent.text}
+                accentDot={accent.dot}
+              />
+            </div>
+          )}
         </div>
       </section>
 
       {/* Subsections */}
-      <section className="py-16 px-4 flex-1">
+      <section id="categorias" className="py-16 px-4 flex-1 scroll-mt-20">
         <div className="container mx-auto">
           {subsections.length > 0 ? (
             <>
-              <h2 className="text-2xl font-bold text-white mb-8">Categorías</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <h2 className="text-3xl font-bold text-white text-center mb-3">Categorías Principales</h2>
+              <p className="text-center text-gray-400 mb-12">
+                Explora el contenido organizado de {section.name}.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {subsections.map((sub) => {
                   const SubIcon = sub.icon
                   return (
                     <Link key={sub.slug} href={`${section.href}/${sub.slug}`} className="group">
-                      <Card className="h-full bg-gray-900 border-gray-800 hover:border-red-500 transition-all duration-300">
-                        <CardHeader>
-                          <div className="flex items-start justify-between mb-2">
-                            <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-gray-800 group-hover:bg-red-600/10 transition-colors">
-                              <SubIcon className="h-5 w-5 text-red-500" />
-                            </span>
-                            <ArrowRight className="h-5 w-5 text-gray-600 group-hover:text-red-400 group-hover:translate-x-1 transition-all" />
-                          </div>
-                          <CardTitle className="text-white group-hover:text-red-400 transition-colors">
+                      <Card
+                        className={cn(
+                          "h-full bg-gray-900 border-gray-800 transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
+                          accent.cardHover,
+                          accent.glow,
+                        )}
+                      >
+                        <CardHeader className="items-center text-center">
+                          <span
+                            className={cn(
+                              "flex h-14 w-14 items-center justify-center rounded-xl border transition-colors mb-2",
+                              accent.iconBox,
+                              accent.iconHoverBg,
+                            )}
+                          >
+                            <SubIcon className={cn("h-7 w-7", accent.text)} />
+                          </span>
+                          <CardTitle className={cn("text-white transition-colors", accent.titleHover)}>
                             {sub.name}
                           </CardTitle>
                           <CardDescription className="text-gray-400 leading-relaxed">
