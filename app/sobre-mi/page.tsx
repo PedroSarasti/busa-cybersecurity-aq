@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Download,
   Github,
   Linkedin,
   Mail,
@@ -14,80 +13,140 @@ import {
   Terminal,
   ShieldCheck,
   Crosshair,
-  Network,
   Bug,
   Code2,
+  MessageCircle,
+  MapPin,
+  Phone,
+  Target,
+  Search,
+  FileSearch,
 } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
+import { CvDownload } from "@/components/cv-download"
+import { Certifications, type Certification } from "@/components/certifications"
 
 export const metadata: Metadata = {
   title: "Sobre mí | BUSA Cybersecurity",
   description:
-    "Perfil profesional: especialista en hacking ético y Red Team. Habilidades, certificaciones y experiencia.",
+    "Pedro José Bustamante Sarasti — Ingeniero de Software especializado en ciberseguridad ofensiva y penetration testing.",
 }
 
 const specializations = [
-  { name: "Red Team Operations", icon: Crosshair },
-  { name: "Penetration Testing", icon: ShieldCheck },
-  { name: "Active Directory", icon: Network },
-  { name: "Análisis de Malware", icon: Bug },
+  { name: "Penetration Testing Web", icon: Crosshair },
+  { name: "Análisis de Vulnerabilidades", icon: ShieldCheck },
+  { name: "Análisis de Código (SAST)", icon: FileSearch },
+  { name: "Automatización Ofensiva", icon: Terminal },
 ]
 
 const skills = [
-  "Penetration Testing",
-  "Red Teaming",
-  "OSINT",
-  "Web App Security",
-  "API Security",
-  "Active Directory",
-  "Privilege Escalation",
-  "Evasión de EDR/AV",
-  "Post-Explotación",
-  "Ingeniería Social",
-  "Reverse Engineering",
-  "Threat Hunting",
+  "Burp Suite",
+  "OWASP Top 10",
+  "Nmap",
+  "sqlmap",
+  "Metasploit",
+  "Postman",
+  "SQL / NoSQL Injection",
+  "XSS / CSRF",
+  "Clickjacking",
+  "CxOne (SAST)",
+  "Análisis CVSS",
+  "APIs REST",
 ]
 
 const languages = [
   { name: "Python", icon: Code2 },
   { name: "Bash", icon: Terminal },
   { name: "PowerShell", icon: Terminal },
-  { name: "C#", icon: Code2 },
-  { name: "Go", icon: Code2 },
+  { name: "C# / .NET", icon: Code2 },
+  { name: "SQL", icon: Code2 },
+  { name: "JavaScript", icon: Code2 },
 ]
 
-const certifications = [
-  { name: "OSCP", issuer: "OffSec" },
-  { name: "eJPT", issuer: "INE / eLearnSecurity" },
-  { name: "CRTP", issuer: "Altered Security" },
-  { name: "CEH", issuer: "EC-Council" },
-  { name: "PNPT", issuer: "TCM Security" },
-  { name: "CompTIA Security+", issuer: "CompTIA" },
+const certifications: Certification[] = [
+  {
+    name: "eWPT",
+    issuer: "INE Security",
+    date: "Jun. 2026",
+    credentialId: "185433777",
+    // Coloca el archivo en /public/certificados/ewpt.png o .pdf y actualiza la ruta
+    file: "",
+  },
+  {
+    name: "CCST Cybersecurity",
+    issuer: "Cisco",
+    date: "Ago. 2024",
+    file: "",
+  },
+  {
+    name: "Diplomado Hacking Ético y Riesgos Cibernéticos",
+    issuer: "Univ. Sergio Arboleda & Colsubsidio",
+    date: "Mar. — May. 2026 · 80h",
+    file: "",
+  },
+]
+
+const education = [
+  {
+    title: "Diplomado en Hacking Ético y Riesgos Cibernéticos",
+    org: "Univ. Sergio Arboleda & Colsubsidio",
+    period: "Mar. — May. 2026 · 80h",
+  },
+  {
+    title: "Ingeniería de Software",
+    org: "UNINPAHU, Bogotá",
+    period: "Ene. 2019 — Nov. 2023",
+  },
 ]
 
 const experience = [
   {
-    role: "Red Team Operator",
-    org: "Empresa de Ciberseguridad",
-    period: "2023 — Actualidad",
-    description:
-      "Ejecución de operaciones de Red Team, simulación de adversarios y evaluación de la postura de seguridad de clientes corporativos.",
+    role: "Junior Engineer — Ciberseguridad Ofensiva",
+    org: "NTT DATA · Bogotá, D.C.",
+    period: "Oct. 2023 — Actualidad",
+    bullets: [
+      "Pruebas de penetración web manuales sobre aplicaciones en producción aplicando OWASP Top 10: inyecciones SQL/NoSQL, XSS, Clickjacking, CSRF y fallos de autenticación/autorización.",
+      "Interceptación y manipulación de tráfico HTTP/S con Burp Suite y Postman para explotación manual en APIs REST y aplicaciones web.",
+      "Pentests completos y retests semanales: reconocimiento con Nmap, análisis de superficie de ataque y reportes técnicos.",
+      "Análisis estático (SAST) con CxOne sobre Java, JSP, JavaScript y HTML; acompañamiento a desarrollo en remediación.",
+      "Clasificación de vulnerabilidades con CVSS para priorización de remediaciones.",
+    ],
   },
   {
-    role: "Pentester",
-    org: "Consultora de Seguridad",
-    period: "2021 — 2023",
-    description:
-      "Pruebas de penetración en aplicaciones web, APIs e infraestructura interna, con elaboración de reportes técnicos y ejecutivos.",
+    role: "Software Developer — Backend",
+    org: "SOFTTEK · Bogotá, D.C.",
+    period: "Jul. 2022 — Jun. 2023",
+    bullets: [
+      "Desarrollo e implementación de funcionalidades empresariales sobre .NET / C#.",
+      "Soporte y mantenimiento de plataformas en producción; corrección de bugs y optimización de rendimiento.",
+      "Gestión de bases de datos con SQL Server: scripting, procedimientos almacenados y tuning de consultas.",
+    ],
   },
+]
+
+const objectives = [
+  "Iniciarme activamente en Bug Bounty (Bugcrowd & HackerOne).",
+  "Obtener certificaciones avanzadas: eWPTX, OSCP / CPTS.",
+  "Desarrollar herramientas de hacking propias en Python y Bash.",
+  "Profundizar en Red Team, explotación avanzada y evasión de defensas.",
+]
+
+const socials = [
+  { name: "GitHub", href: "https://github.com/PedroSarasti", icon: Github },
   {
-    role: "Analista de Seguridad Junior",
-    org: "Departamento de TI",
-    period: "2020 — 2021",
-    description:
-      "Monitoreo de seguridad, gestión de vulnerabilidades y soporte en la respuesta a incidentes.",
+    name: "LinkedIn",
+    href: "https://linkedin.com/in/pedro-josé-bustamante-sarasti",
+    icon: Linkedin,
   },
+  // Discord no tiene URL de perfil pública; se muestra el usuario.
+  { name: "Discord: pedrinhox17", href: "#", icon: MessageCircle },
+  { name: "Email", href: "mailto:pedrojbs1704@outlook.com", icon: Mail },
+  // Placeholders para plataformas clave en un perfil ofensivo. Actualiza las URLs.
+  { name: "Hack The Box", href: "#", icon: Target },
+  { name: "TryHackMe", href: "#", icon: ShieldCheck },
+  { name: "HackerOne", href: "#", icon: Bug },
+  { name: "Bugcrowd", href: "#", icon: Search },
 ]
 
 export default function SobreMiPage() {
@@ -100,29 +159,42 @@ export default function SobreMiPage() {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-8 max-w-4xl">
             <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-2xl bg-red-600/10 border border-red-600/30">
-              <span className="text-4xl font-bold text-red-500">BU</span>
+              <span className="text-4xl font-bold text-red-500">PB</span>
             </div>
             <div className="text-center md:text-left">
-              <p className="text-red-400 font-medium mb-2">Ethical Hacker · Red Team Operator</p>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-balance">Sobre mí</h1>
-              <p className="text-lg text-gray-300 leading-relaxed text-pretty">
-                Especialista en seguridad ofensiva apasionado por el hacking ético, el Red Team y la investigación de
-                vulnerabilidades. Documento aquí mi aprendizaje diario, laboratorios y experiencias en el mundo
-                ofensivo.
+              <p className="text-red-400 font-medium mb-2">
+                Ingeniero de Software · Ciberseguridad Ofensiva & Penetration Testing
               </p>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-balance">
+                Pedro José Bustamante Sarasti
+              </h1>
+              <p className="text-lg text-gray-300 leading-relaxed text-pretty">
+                Junior Engineer en seguridad ofensiva con experiencia real en pruebas de penetración sobre aplicaciones
+                web en producción. Certificado eWPT (INE Security), documento aquí mi aprendizaje, laboratorios y camino
+                hacia el Red Team.
+              </p>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-5 text-sm text-gray-400">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4 text-red-500" />
+                  Bogotá, D.C., Colombia
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Mail className="h-4 w-4 text-red-500" />
+                  pedrojbs1704@outlook.com
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Phone className="h-4 w-4 text-red-500" />
+                  319 637 9242
+                </span>
+              </div>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-6">
-                <Button className="bg-red-600 hover:bg-red-700 text-white" asChild>
-                  <Link href="/cv/BUSA-CV.pdf" download>
-                    <Download className="mr-2 h-4 w-4" />
-                    Descargar CV
-                  </Link>
-                </Button>
+                <CvDownload />
                 <Button
                   variant="outline"
                   className="border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
                   asChild
                 >
-                  <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+                  <Link href="https://github.com/PedroSarasti" target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-4 w-4" />
                     GitHub
                   </Link>
@@ -132,19 +204,13 @@ export default function SobreMiPage() {
                   className="border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
                   asChild
                 >
-                  <Link href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+                  <Link
+                    href="https://linkedin.com/in/pedro-josé-bustamante-sarasti"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Linkedin className="mr-2 h-4 w-4" />
                     LinkedIn
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
-                  asChild
-                >
-                  <Link href="mailto:contacto@busacybersecurity.com">
-                    <Mail className="mr-2 h-4 w-4" />
-                    Email
                   </Link>
                 </Button>
               </div>
@@ -157,17 +223,21 @@ export default function SobreMiPage() {
         {/* Biografía + especialización */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-white mb-4">Quién soy</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Perfil profesional</h2>
             <div className="space-y-4 text-gray-300 leading-relaxed">
               <p>
-                Soy un profesional de la ciberseguridad enfocado en la seguridad ofensiva. Mi trabajo combina la
-                ejecución de operaciones de Red Team con la investigación constante de nuevas técnicas de intrusión,
-                evasión y post-explotación.
+                Ingeniero de Software con cerca de tres años de experiencia profesional, los últimos dos enfocados en
+                ciberseguridad ofensiva dentro de un entorno corporativo real. Me desempeño como Junior Engineer en
+                seguridad informática, participando en proyectos de identificación y mitigación de vulnerabilidades en
+                código, pruebas de penetración sobre aplicaciones web en producción y acompañamiento técnico a equipos
+                de desarrollo.
               </p>
               <p>
-                Creé BUSA Cybersecurity como mi base de conocimiento personal: un espacio donde documento writeups de
-                máquinas y laboratorios, metodologías de pentesting, desarrollo de herramientas y análisis de malware,
-                con el objetivo de aprender en público y compartir con la comunidad.
+                Cuento con la certificación eWPT de INE Security y un Diplomado en Hacking Ético, respaldados por una
+                base sólida en desarrollo backend que me permite entender las aplicaciones desde adentro. Mi enfoque
+                actual está en consolidar mis habilidades ofensivas, incursionar en bug bounty y desarrollar
+                herramientas propias en Python para automatización de procesos de hacking, con miras a crecer hacia Red
+                Team.
               </p>
             </div>
           </div>
@@ -216,7 +286,7 @@ export default function SobreMiPage() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Code2 className="h-5 w-5 text-red-500" />
-                Lenguajes de programación
+                Lenguajes & scripting
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -240,26 +310,16 @@ export default function SobreMiPage() {
 
         {/* Certificaciones */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-            <Award className="h-6 w-6 text-red-500" />
-            Certificaciones
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {certifications.map((cert) => (
-              <Card
-                key={cert.name}
-                className="bg-gray-900 border-gray-800 hover:border-red-500 transition-colors text-center"
-              >
-                <CardContent className="pt-6 pb-5">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-600/10 border border-red-600/30">
-                    <Award className="h-6 w-6 text-red-500" />
-                  </div>
-                  <p className="font-bold text-white">{cert.name}</p>
-                  <p className="text-xs text-gray-500 mt-1">{cert.issuer}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <Award className="h-6 w-6 text-red-500" />
+              Certificaciones & Diplomas
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Haz clic en una certificación para ver el diploma correspondiente.
+            </p>
           </div>
+          <Certifications items={certifications} />
         </section>
 
         {/* Experiencia (timeline) */}
@@ -278,14 +338,84 @@ export default function SobreMiPage() {
                   <h3 className="text-lg font-semibold text-white">{exp.role}</h3>
                   <span className="text-sm text-red-400">{exp.period}</span>
                 </div>
-                <p className="text-gray-400 font-medium mb-2">{exp.org}</p>
-                <p className="text-gray-400 leading-relaxed">{exp.description}</p>
+                <p className="text-gray-400 font-medium mb-3">{exp.org}</p>
+                <ul className="space-y-2">
+                  {exp.bullets.map((bullet, i) => (
+                    <li key={i} className="flex gap-2 text-gray-400 leading-relaxed">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                      <span>{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
-          <p className="mt-8 flex items-center gap-2 text-sm text-gray-600">
-            <GraduationCap className="h-4 w-4" />
-            Formación y aprendizaje continuo en plataformas como Hack The Box, TryHackMe y OffSec.
+        </section>
+
+        {/* Formación + objetivos */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <GraduationCap className="h-6 w-6 text-red-500" />
+              Formación
+            </h2>
+            <div className="space-y-4">
+              {education.map((edu) => (
+                <div key={edu.title} className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+                  <h3 className="font-semibold text-white">{edu.title}</h3>
+                  <p className="text-gray-400 text-sm mt-1">{edu.org}</p>
+                  <p className="text-red-400 text-xs mt-1">{edu.period}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <Target className="h-6 w-6 text-red-500" />
+              Objetivos profesionales
+            </h2>
+            <ul className="space-y-3">
+              {objectives.map((obj) => (
+                <li
+                  key={obj}
+                  className="flex gap-3 rounded-lg border border-gray-800 bg-gray-900 p-4 text-gray-300"
+                >
+                  <Crosshair className="h-5 w-5 shrink-0 text-red-500" />
+                  <span>{obj}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Redes / contacto */}
+        <section>
+          <h2 className="text-2xl font-bold text-white mb-6">Conecta conmigo</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {socials.map((social) => {
+              const Icon = social.icon
+              const isPlaceholder = social.href === "#"
+              return (
+                <Link
+                  key={social.name}
+                  href={social.href}
+                  target={social.href.startsWith("http") ? "_blank" : undefined}
+                  rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  className={`flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900 p-4 transition-colors hover:border-red-500 ${
+                    isPlaceholder ? "opacity-70" : ""
+                  }`}
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-md bg-red-600/10">
+                    <Icon className="h-5 w-5 text-red-500" />
+                  </span>
+                  <span className="text-gray-200 font-medium text-sm">{social.name}</span>
+                </Link>
+              )
+            })}
+          </div>
+          <p className="mt-4 text-xs text-gray-600">
+            Los enlaces marcados con # son placeholders. Actualiza las URLs de Discord, Hack The Box, TryHackMe,
+            HackerOne y Bugcrowd directamente en el código cuando las tengas.
           </p>
         </section>
       </div>
