@@ -1,11 +1,21 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
-import { ChevronRight, FileText } from "lucide-react"
+import { ChevronRight, FileText, CalendarDays, ArrowRight } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { sections, getSubSection, getAccent } from "@/lib/navigation"
+import { getArticles } from "@/lib/content"
 import { cn } from "@/lib/utils"
+
+/** Formatea una fecha ISO (YYYY-MM-DD) a un texto legible en español. */
+function formatDate(date: string): string {
+  if (!date) return ""
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return date
+  return parsed.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })
+}
 
 export function generateStaticParams() {
   return sections.flatMap((section) =>
