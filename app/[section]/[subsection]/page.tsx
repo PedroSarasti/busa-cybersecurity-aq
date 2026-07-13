@@ -8,6 +8,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { sections, getSubSection, getAccent } from "@/lib/navigation"
 import { getArticles } from "@/lib/content"
 import { cn } from "@/lib/utils"
+import { PortswiggerLabsLayout } from "@/components/portswigger_labs_layout"
 
 /** Formatea una fecha ISO (YYYY-MM-DD) a un texto legible en español. */
 function formatDate(date: string): string {
@@ -90,7 +91,17 @@ export default async function SubSectionPage({
         </div>
       </section>
 
-      {/* Content list: artículos MDX o estado vacío */}
+      {sectionSlug === "writeups" && subSlug === "portswigger" ? (
+        <section className="py-16 px-4 flex-1">
+          <PortswiggerLabsLayout
+            articles={articles}
+            accent={accent}
+            basePath={`${section.href}/${subsection.slug}`}
+            backHref={section.href}
+          />
+        </section>
+      ) : (
+      /* Content list: artículos MDX o estado vacío */
       <section className="py-16 px-4 flex-1">
         <div className="container mx-auto">
           {articles.length > 0 ? (
@@ -157,6 +168,7 @@ export default async function SubSectionPage({
           )}
         </div>
       </section>
+      )}
 
       <SiteFooter />
     </div>

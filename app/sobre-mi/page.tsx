@@ -26,6 +26,7 @@ import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { CvDownload } from "@/components/cv-download"
 import { Certifications, type Certification } from "@/components/certifications"
+import Image from "next/image"
 
 export const metadata: Metadata = {
   title: "Sobre mí | BUSA Cybersecurity",
@@ -139,14 +140,12 @@ const socials = [
     href: "https://linkedin.com/in/pedro-josé-bustamante-sarasti",
     icon: Linkedin,
   },
-  // Discord no tiene URL de perfil pública; se muestra el usuario.
-  { name: "Discord: pedrinhox17", href: "#", icon: MessageCircle },
-  { name: "Email", href: "mailto:pedrojbs1704@outlook.com", icon: Mail },
-  // Placeholders para plataformas clave en un perfil ofensivo. Actualiza las URLs.
+  { name: "TryHackMe", href: "https://tryhackme.com/p/PedrinhoX", icon: ShieldCheck },
   { name: "Hack The Box", href: "#", icon: Target },
-  { name: "TryHackMe", href: "#", icon: ShieldCheck },
-  { name: "HackerOne", href: "#", icon: Bug },
-  { name: "Bugcrowd", href: "#", icon: Search },
+  { name: "HackerOne", href: "https://hackerone.com/pedrinhox?type=user", icon: Bug },
+  { name: "Bugcrowd", href: "https://bugcrowd.com/h/PedrinhoX", icon: Search },
+  { name: "Email", href: "mailto:pedrojbs1704@outlook.com", icon: Mail },
+
 ]
 
 export default function SobreMiPage() {
@@ -157,9 +156,18 @@ export default function SobreMiPage() {
       {/* Hero / presentación */}
       <section className="py-16 px-4 bg-gradient-to-br from-red-900/20 via-gray-950 to-black border-b border-gray-800">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-center gap-8 max-w-4xl">
-            <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-2xl bg-red-600/10 border border-red-600/30">
+          <div className="flex flex-col md:flex-row items-center gap-8 max-w-5xl">
+            {/* <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-2xl bg-red-600/10 border border-red-600/30">
               <span className="text-4xl font-bold text-red-500">PB</span>
+            </div> */}
+            <div className="relative h-60 w-60 shrink-0 overflow-hidden rounded-2xl border border-red-600/30">
+              <Image
+                src="/images_perfil/pedro_animada.jpeg"
+                alt="Pedro José Bustamante Sarasti"
+                fill
+                className="object-cover"
+                priority
+              />
             </div>
             <div className="text-center md:text-left">
               <p className="text-red-400 font-medium mb-2">

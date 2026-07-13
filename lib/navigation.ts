@@ -178,7 +178,7 @@ export const sections: Section[] = [
     subsections: [
       { name: "Hack The Box", slug: "hack-the-box", description: "Writeups de máquinas y retos de HTB.", icon: Box },
       { name: "TryHackMe", slug: "tryhackme", description: "Resoluciones de salas y rutas de THM.", icon: Flag },
-      { name: "VulnHub", slug: "vulnhub", description: "Soluciones de máquinas vulnerables de VulnHub.", icon: Server },
+      { name: "PortSwigger", slug: "portswigger", description: "Soluciones de labs de PortSwigger Web Security Academy.", icon: Bug },
       { name: "Cheatsheets", slug: "cheatsheets", description: "Hojas de referencia rápida y comandos clave.", icon: ScrollText },
     ],
   },

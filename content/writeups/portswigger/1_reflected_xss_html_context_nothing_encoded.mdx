@@ -1,0 +1,46 @@
+---
+title: "#1 - Reflected XSS into HTML context with nothing encoded"
+description: "Explotación de un XSS reflejado en la funcionalidad de búsqueda, inyectando un payload de JavaScript que se refleja sin codificar en la respuesta HTML."
+date: "2026-07-12"
+tags: ["portswigger", "cross-site-scripting", "apprentice", "xss"]
+category: "cross-site-scripting"
+---
+
+Status: Completed
+Difficulty: APPRENTICE
+Main Vulnerability: XSS
+Platform: Portswigger
+
+**Laboratorio:** [Lab: Reflected XSS into HTML context with nothing encoded | Web Security Academy](https://portswigger.net/web-security/cross-site-scripting/reflected/lab-html-context-nothing-encoded)
+
+- Objetivo:  Explotar una vulnerabilidad de tipo Cross-Site Scripting (XSS) reflejado en la funcionalidad de búsqueda de la aplicación, logrando ejecutar código JavaScript (función `alert`) en el navegador.
+
+## **Análisis inicial**
+
+El parámetro de búsqueda no está correctamente validado ni codificado en la respuesta HTML.
+
+Esto permite inyectar directamente código HTML/JavaScript que será interpretado por el navegador.
+
+## Solución
+
+- Se inyecta un payload XSS básico en el parámetro de búsqueda para provocar la ejecución de código JavaScript:
+
+```jsx
+<script>alert(1)</script>
+```
+
+Payload completo en la URL:
+
+```
+GET /?search=<script>alert(1)</script>
+```
+
+El payload se refleja y es interpretado por el navegador, ejecutando la función `alert`.
+
+![Payload XSS inyectado en el parámetro de búsqueda](/writeups/portswigger/reflected_xss_html_context_nothing_encoded/image.png)
+
+## ✅ Resultado
+
+El script fue ejecutado con éxito, mostrando un cuadro de alerta en el navegador: 
+
+![Cuadro de alerta ejecutado en el navegador confirmando el XSS](/writeups/portswigger/reflected_xss_html_context_nothing_encoded/image%201.png)

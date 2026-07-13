@@ -12,6 +12,7 @@ export interface ArticleMeta {
   description: string
   date: string
   tags: string[]
+  category?: string
 }
 
 /** Artículo completo, incluyendo el cuerpo MDX sin procesar. */
@@ -30,6 +31,7 @@ function toMeta(fileName: string, data: Record<string, unknown>): ArticleMeta {
     description: typeof data.description === "string" ? data.description : "",
     date: typeof data.date === "string" ? data.date : "",
     tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
+    category: typeof data.category === "string" ? data.category : undefined,
   }
 }
 
