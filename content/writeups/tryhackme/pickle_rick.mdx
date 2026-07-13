@@ -1,0 +1,134 @@
+---
+title: "WriteUp - Pickle Rick"
+description: "Writeup de la máquina Pickle Rick de TryHackMe: enumeración web, login con credenciales filtradas, ejecución remota de comandos mediante un command panel y escalada de privilegios con sudo."
+date: "2026-07-12"
+tags: ["tryhackme", "pentesting", "linux", "web", "rce", "easy"]
+---
+
+Status: Completed
+Difficulty: Easy
+Platform: TryHackMe
+
+## Reconocimiento
+
+Iniciamos el reconocimiento con nmap:
+
+```bash
+nmap -sV -sC 10.64.187.225
+```
+
+![Resultado del escaneo nmap mostrando los puertos abiertos](/writeups/tryhackme/pickle_rick/image.png)
+
+## Enumeración
+
+El único puerto interesante fue el 80, lo que nos indica que hay una pagina web, ingresamos y nos encontramos con lo siguiente
+
+![Página principal del sitio web](/writeups/tryhackme/pickle_rick/image%201.png)
+
+Inspeccionamos el codigo fuente de la pagina y nos encontramos con un comentario en el cual nos indican el nombre de usuario `R1ckRul3s`
+
+![Comentario en el código fuente revelando el usuario R1ckRul3s](/writeups/tryhackme/pickle_rick/image%202.png)
+
+Realizamos un fuzing de directorios y encontramos lo siguiente 
+
+![Resultado del fuzzing de directorios](/writeups/tryhackme/pickle_rick/image%203.png)
+
+En `assets` no había nada interesante, revisamos robots.txt y encontramos la siguiente frase
+
+![Contenido del archivo robots.txt](/writeups/tryhackme/pickle_rick/image%204.png)
+
+La frase de la pantalla principal indicaba que debíamos iniciar sesión, por ende buscamos `login.php` y nos encontramos con la existencia de un login  
+
+![Formulario de login en login.php](/writeups/tryhackme/pickle_rick/image%205.png)
+
+## Explotación
+
+Al iniciar sesion con las credenciales Username:`R1ckRul3s` - Password:`Wubbalubbadubdub`
+
+nos encontramos con lo siguiente:
+
+![Panel obtenido tras iniciar sesión](/writeups/tryhackme/pickle_rick/image%206.png)
+
+Un **Command Panel** — esto es ejecución remota de comandos.
+
+Listamos y nos aparece lo que seria el primer ingrediente
+
+![Listado de archivos mostrando el primer ingrediente](/writeups/tryhackme/pickle_rick/image%207.png)
+
+Al tratar de abrirlo con `cat` nos da un error por lo que tratamos con otros comando como `less` 
+
+```bash
+less Sup3rS3cretPickl3Ingred.txt
+```
+
+![Lectura del archivo con less mostrando el primer ingrediente](/writeups/tryhackme/pickle_rick/image%208.png)
+
+Primer ingrediente: `mr. meeseek hair`
+
+![Confirmación del primer ingrediente](/writeups/tryhackme/pickle_rick/image%209.png)
+
+## Post-explotación
+
+Para el segundo ingrediente leemos `clue.txt`
+
+![Contenido del archivo clue.txt](/writeups/tryhackme/pickle_rick/image%2010.png)
+
+Buscamos en el home de rick 
+
+![Listado del directorio home de rick](/writeups/tryhackme/pickle_rick/image%2011.png)
+
+Leemos ese archivo
+
+```bash
+less /home/rick/"second ingredients"
+```
+
+![Lectura del archivo second ingredients](/writeups/tryhackme/pickle_rick/image%2012.png)
+
+Y nos encontramos con el segundo ingrediente: `1 jerry tear`
+
+![Confirmación del segundo ingrediente](/writeups/tryhackme/pickle_rick/image%2013.png)
+
+## Escalada de privilegios
+
+Validemos que se puede ejecutar con permisos de root
+
+```bash
+sudo -l
+```
+
+![Resultado de sudo -l mostrando permisos de www-data](/writeups/tryhackme/pickle_rick/image%2014.png)
+
+Podemos ver que `www-data` puede ejecutar **cualquier comando como root sin contraseña**
+
+Listamos el directorio root y podremos ver que se encuentra el tercer y ultimo ingrediente
+
+```bash
+sudo ls /root
+```
+
+![Listado del directorio root con el tercer ingrediente](/writeups/tryhackme/pickle_rick/image%2015.png)
+
+leemos el archivo
+
+```bash
+sudo less /root/3rd.txt
+```
+
+![Lectura del archivo 3rd.txt](/writeups/tryhackme/pickle_rick/image%2016.png)
+
+Tercer ingrediente: `fleeb juice`
+
+![Confirmación del tercer ingrediente](/writeups/tryhackme/pickle_rick/image%2017.png)
+
+![Vista final tras completar la máquina](/writeups/tryhackme/pickle_rick/image%2018.png)
+
+- Informe de Misión:
+    
+    ![Informe de misión, parte 1](/writeups/tryhackme/pickle_rick/image%2019.png)
+    
+    ![Informe de misión, parte 2](/writeups/tryhackme/pickle_rick/image%2020.png)
+    
+    ![Informe de misión, parte 3](/writeups/tryhackme/pickle_rick/image%2021.png)
+    
+    ![Informe de misión, parte 4](/writeups/tryhackme/pickle_rick/image%2022.png)
