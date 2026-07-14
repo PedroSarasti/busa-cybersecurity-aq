@@ -1,0 +1,50 @@
+---
+title: "#2 - Stored XSS into HTML context with nothing encoded"
+description: "Explotación de una vulnerabilidad de XSS almacenado en el contexto HTML sin encoding mediante la funcionalidad de comentarios de un blog."
+date: "2026-07-13"
+tags: ["portswigger", "cross-site-scripting", "stored-xss", "apprentice"]
+category: "cross-site-scripting"
+difficulty: "APPRENTICE"
+---
+
+**Laboratorio:** [Lab: Stored XSS into HTML context with nothing encoded | Web Security Academy](https://portswigger.net/web-security/cross-site-scripting/stored/lab-html-context-nothing-encoded)
+
+- Objetivo:  Explotar una vulnerabilidad de XSS almacenado (Stored XSS) en el contexto HTML sin encoding, logrando ejecutar un script malicioso cuando otro usuario visualice el contenido inyectado.
+
+## **Análisis inicial**
+
+Se observa que la aplicación permite a los usuarios enviar comentarios en las publicaciones del blog.
+Tras una inspección manual, se detecta que los comentarios enviados se reflejan en el HTML de la página sin ninguna codificación de caracteres, lo que permite inyectar código HTML y scripts directamente.
+
+## Solución
+
+- **Identificación de punto de entrada**
+    
+    Se identifica un formulario de envío de comentarios en el blog:
+    
+    ![Formulario de envío de comentarios en la publicación del blog](/writeups/portswigger/2_stored_xss_html_context_nothing_encoded/image.png)
+    
+
+- **Inyección del payload**
+    
+    Se utiliza un payload básico de XSS para validar la vulnerabilidad:
+    
+    ```jsx
+    <script>alert(1)</script>
+    ```
+    
+    El payload se introduce en el campo de comentario, como se muestra a continuación:
+    
+    ![Payload XSS introducido en el campo de comentario](/writeups/portswigger/2_stored_xss_html_context_nothing_encoded/image%201.png)
+    
+
+- **Ejecución del script**
+    
+    Tras enviar el formulario y visualizar el blog post, el navegador interpreta el script inyectado y ejecuta la función `alert(1)`:
+    
+
+## ✅ Resultado
+
+El payload fue ejecutado con éxito, confirmando la existencia de una vulnerabilidad de Stored XSS en la funcionalidad de comentarios.
+
+![Alerta de JavaScript ejecutada en el navegador confirmando la explotación exitosa del Stored XSS](/writeups/portswigger/2_stored_xss_html_context_nothing_encoded/image%202.png)

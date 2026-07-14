@@ -2,12 +2,12 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { MDXRemote } from "next-mdx-remote/rsc"
-import { ChevronRight, CalendarDays, ArrowLeft, Tag } from "lucide-react"
+import { ChevronRight, CalendarDays, ArrowLeft, Tag, BookOpenText, ArrowRight } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { getMdxComponents } from "@/components/mdx-components"
 import { getSubSection, getAccent } from "@/lib/navigation"
-import { getArticle, getAllArticleParams } from "@/lib/content"
+import { getArticle, getAllArticleParams, getSubArticles } from "@/lib/content"
 import { cn } from "@/lib/utils"
 
 /** Formatea una fecha ISO (YYYY-MM-DD) a un texto legible en español. */
@@ -53,6 +53,8 @@ export default async function ArticlePage({
   if (!article) {
     notFound()
   }
+
+  const subArticles = getSubArticles(sectionSlug, subSlug, slug)
 
   const accent = getAccent(section)
   const mdxComponents = getMdxComponents(accent.text)
@@ -112,6 +114,30 @@ export default async function ArticlePage({
       <section className="py-12 px-4 flex-1">
         <article className="container mx-auto max-w-3xl">
           <MDXRemote source={article.content} components={mdxComponents} />
+
+          {subArticles.length > 0 && (
+            <div className="mt-10 border-t border-gray-800 pt-8">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-white mb-4">
+                <BookOpenText className={cn("h-5 w-5", accent.text)} />
+                Contenido relacionado
+              </h2>
+              <div className="flex flex-col gap-3">
+                {subArticles.map((sub) => (
+                  <Link
+                    key={sub.slug}
+                    href={`${section.href}/${subsection.slug}/${slug}/${sub.slug}`}
+                    className="group flex items-center justify-between gap-4 rounded-lg border border-gray-800 bg-gray-900/50 px-4 py-3 transition-colors hover:border-gray-700 hover:bg-gray-900"
+                  >
+                    <div>
+                      <p className={cn("font-medium text-white transition-colors", accent.titleHover)}>{sub.title}</p>
+                      {sub.description && <p className="text-sm text-gray-400 mt-0.5">{sub.description}</p>}
+                    </div>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-gray-500 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mt-12 border-t border-gray-800 pt-6">
             <Link

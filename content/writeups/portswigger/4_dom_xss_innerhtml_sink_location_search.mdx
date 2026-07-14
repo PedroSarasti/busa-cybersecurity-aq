@@ -1,0 +1,113 @@
+---
+title: "#4 - DOM XSS in innerHTML sink using source location.search"
+description: "Explotación de una vulnerabilidad DOM XSS provocada por el uso inseguro de innerHTML con el parámetro search de la URL como source."
+date: "2026-07-13"
+tags: ["portswigger", "cross-site-scripting", "dom-xss", "apprentice"]
+category: "cross-site-scripting"
+difficulty: "APPRENTICE"
+---
+
+**Laboratorio:** [Lab: DOM XSS in innerHTML sink using source location.search | Web Security Academy](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-innerhtml-sink)
+
+- Objetivo:  Explotar una vulnerabilidad de **DOM-based Cross-Site Scripting (XSS)**, provocada por el uso inseguro de `innerHTML`, con entrada controlada por el usuario a través del objeto `location.search`.
+    
+    ## **Análisis inicial**
+    
+
+Al acceder a la página del laboratorio, se presenta una barra de búsqueda. Se sospecha que los parámetros introducidos en esta búsqueda son reflejados directamente en el DOM, sin mecanismos de sanitización.
+
+## Solución
+
+- **Identificación de punto de entrada**
+    
+    Se utiliza la barra de búsqueda para enviar una cadena aleatoria (`test123`). Al hacerlo, se observa que esta cadena se refleja en la URL como parámetro `search`.
+    
+
+```
+?search=test123
+```
+
+- Análisis del código fuente
+    
+    Al inspeccionar el código fuente del sitio (Ctrl+U), se identifica el siguiente fragmento JavaScript:
+    
+    ![Código fuente del sitio mostrando la función doSearchQuery con el sink innerHTML](/writeups/portswigger/4_dom_xss_innerhtml_sink_location_search/image.png)
+    
+    ```jsx
+    function doSearchQuery(query) {
+    		document.getElementById('searchMessage').innerHTML = query;
+    }
+    var query = (new URLSearchParams(window.location.search)).get('search');
+    if(query) {
+    		doSearchQuery(query);
+    }
+    ```
+    
+    - Función del código
+        
+        El código obtiene el valor del parámetro `search` desde la URL y lo inserta en el elemento con id `searchMessage` usando `innerHTML`. Como `innerHTML` interpreta el contenido como HTML, cualquier entrada del usuario se renderiza directamente en el DOM, lo que permite ejecutar código malicioso (XSS).
+        
+    
+    ✅ **Observaciones técnicas:**
+    
+    - El parámetro `search` se obtiene de `location.search`.
+    - Se pasa directamente a `innerHTML`, lo cual interpreta el valor como HTML en lugar de texto plano.
+    - Esto permite inyectar etiquetas maliciosas, resultando en la ejecución de código arbitrario.
+
+- **Inyección del payload**
+    
+    Se prueba la vulnerabilidad utilizando el siguiente payload:
+    
+    ```jsx
+    <img src=1 onerror=alert(1)>
+    ```
+    
+    Este payload se inserta en el campo de búsqueda, lo cual genera una URL como:
+    
+    ![URL generada con el payload XSS inyectado en el parámetro search](/writeups/portswigger/4_dom_xss_innerhtml_sink_location_search/image%201.png)
+    
+
+```jsx
+?search=<img src=1 onerror=alert(1)>
+```
+
+- **Ejecución del payload**
+    
+    Después de enviar la búsqueda, el navegador interpreta el contenido inyectado dentro del `document.write`, resultando en la ejecución del script malicioso:
+    
+    ```html
+    <p id="searchMessage">
+        <img src=1 onerror=alert(1)>
+    </p>
+    ```
+    
+    Esto activa el evento `onerror`, disparando `alert(1)` y confirmando la ejecución de código JavaScript arbitrario
+    
+- **Inyección de segundo posible payload**
+    
+    Prueba de segundo payload
+    
+    ```jsx
+    <img src=x onmouseover=alert(1)>
+    ```
+    
+    Esto activa el evento `onmouseover`, disparando `alert(1)` al pasar el mouse por la imagen y confirmando la ejecución de código JavaScript arbitrario
+    
+
+## ✅ Resultado
+
+La vulnerabilidad fue confirmada: se logró ejecutar JavaScript inyectado desde el parámetro `search`, lo cual representa una **DOM XSS (Reflected)** en el *sink* `innerHTML`
+
+![Alerta de JavaScript ejecutada en el navegador confirmando la explotación exitosa del DOM XSS](/writeups/portswigger/4_dom_xss_innerhtml_sink_location_search/image%202.png)
+
+📌 **Nota importante:** Aunque el `alert(1)` es común para validación, en un escenario real un atacante podría robar cookies, sesiones o redirigir al usuario a sitios maliciosos.
+
+### 🧠 **Recomendaciones de mitigación**
+
+- **Evitar `innerHTML`** para mostrar contenido controlado por el usuario.
+    
+    Utilizar propiedades seguras como `textContent` o `innerText`.
+    
+- **Validar y sanitizar entradas** obtenidas desde `location.search` u otras fuentes controladas.
+- Usar librerías de sanitización como **DOMPurify** si es estrictamente necesario procesar HTML dinámico.
+- Adoptar un enfoque de **whitelisting** (permitir solo caracteres/etiquetas seguras) en lugar de blacklisting.
