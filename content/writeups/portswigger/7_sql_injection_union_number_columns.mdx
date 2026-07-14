@@ -1,0 +1,64 @@
+---
+title: "#7 - SQL injection UNION attack, determining the number of columns returned by the query"
+description: "Uso de la técnica ORDER BY para determinar el número de columnas de una consulta vulnerable y validar una inyección UNION SELECT."
+date: "2026-07-13"
+tags: ["portswigger", "sql-injection", "union-based", "order-by", "practitioner"]
+category: "sql-injection"
+difficulty: "PRACTITIONER"
+---
+
+**Laboratorio:** [Lab: SQL injection UNION attack, determining the number of columns returned by the query | Web Security Academy](https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns)
+
+- Objetivo: Conocer todas las columnas existentes
+
+## **Análisis inicial**
+
+La aplicación presenta artículos filtrados por categoría a través de una consulta SQL vulnerable, lo que permite inyectar sentencias maliciosas.
+
+## Consulta original:
+
+```sql
+SELECT * FROM articles WHERE category = ''
+```
+
+La consulta filtra los artículos según la categoría proporcionada en la URL. Esta entrada es vulnerable y puede ser manipulada para ejecutar consultas arbitrarias mediante la cláusula `UNION`.
+
+## 🔎 Observación sobre UNION
+
+La inyección SQL basada en `UNION` permite combinar resultados de múltiples sentencias `SELECT` en una sola salida. Es útil cuando el atacante quiere recuperar datos adicionales de otras tablas, como versiones, usuarios, contraseñas, etc.
+
+## Solución
+
+- **Determinar el número de columnas**
+    
+    Antes de usar `UNION`, necesitamos saber cuántas columnas devuelve la consulta original. Para eso, se usa la técnica `ORDER BY`.
+    
+    **Payloads utilizados:**
+    
+    ```sql
+    ' ORDER BY 1--
+    ' ORDER BY 2--
+    ' ORDER BY 3-- 
+    ' ORDER BY 4--<-Error
+    ```
+    
+    - Se incrementa el número hasta provocar un error.
+    - En este caso, `ORDER BY 4` falla, lo que indica que hay 3 **columnas**.
+    
+- **Validar la inyección `UNION`**
+Una vez conocido el número de columnas (3), se prueba un `UNION SELECT` básico para confirmar que la inyección es funcional.
+    
+    **Payload de prueba:**
+    
+    ```sql
+    ' UNION SELECT NULL, NULL, NULL--
+    ```
+    
+    - Se utilizan valores `NULL` como sustitutos temporales para desconocer los tipos de datos esperados en cada columna.
+    - La respuesta del servidor confirmará si la inyección `UNION` se ejecuta correctamente.
+
+## ✅ Resultado
+
+Con la inyección `UNION`, podemos ahora manipular la consulta y recuperar información adicional.
+
+![Resultado de la inyección UNION SELECT confirmando que la consulta acepta 3 columnas](/writeups/portswigger/7_sql_injection_union_number_columns/2654696d-d0e7-4a08-aebd-c3c54dd1613c.png)

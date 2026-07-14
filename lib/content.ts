@@ -13,6 +13,7 @@ export interface ArticleMeta {
   date: string
   tags: string[]
   category?: string
+  difficulty?: "apprentice" | "practitioner" | "expert"
 }
 
 /** Artículo completo, incluyendo el cuerpo MDX sin procesar. */
@@ -24,6 +25,20 @@ function getSubDir(section: string, subsection: string) {
   return path.join(CONTENT_DIR, section, subsection)
 }
 
+/**
+ * Normaliza el valor de `difficulty` del frontmatter a minúsculas, para que
+ * no importe si en el .mdx se escribió "APPRENTICE", "Apprentice" o "apprentice".
+ * Si el valor no coincide con ninguno de los 3 válidos, devuelve undefined.
+ */
+function normalizeDifficulty(value: unknown): "apprentice" | "practitioner" | "expert" | undefined {
+  if (typeof value !== "string") return undefined
+  const normalized = value.trim().toLowerCase()
+  if (normalized === "apprentice" || normalized === "practitioner" || normalized === "expert") {
+    return normalized
+  }
+  return undefined
+}
+
 function toMeta(fileName: string, data: Record<string, unknown>): ArticleMeta {
   return {
     slug: fileName.replace(/\.mdx$/, ""),
@@ -32,6 +47,7 @@ function toMeta(fileName: string, data: Record<string, unknown>): ArticleMeta {
     date: typeof data.date === "string" ? data.date : "",
     tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
     category: typeof data.category === "string" ? data.category : undefined,
+    difficulty: normalizeDifficulty(data.difficulty),
   }
 }
 

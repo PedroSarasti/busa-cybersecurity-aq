@@ -1,0 +1,87 @@
+---
+title: "#4 - SQL injection attack, querying the database type and version on MySQL and Microsoft"
+description: "Inyección SQL basada en UNION para determinar el número de columnas y extraer la versión del motor MySQL/Microsoft mediante @@version."
+date: "2026-07-13"
+tags: ["portswigger", "sql-injection", "mysql", "mssql", "union-based", "practitioner"]
+category: "sql-injection"
+difficulty: "PRACTITIONER"
+---
+
+**Laboratorio:** [Laboratorio: Ataque de inyección SQL, consultando el tipo y la versión de la base de datos en MySQL y Microsoft | Academia de Seguridad Web](https://portswigger.net/web-security/sql-injection/examining-the-database/lab-querying-database-version-mysql-microsoft)
+
+- Objetivo:  Obtener la versión del sistema de gestión de base de datos MySQL y Microsoft utilizando una inyección SQL basada en `UNION`.
+
+## **Análisis inicial**
+
+Este laboratorio presenta una vulnerabilidad de inyección SQL en la URL, dentro del parámetro `category`. El backend utiliza MySQL y Microsoft como sistema gestor de base de datos. El objetivo es identificar la versión exacta del motor mediante una consulta manipulada.
+
+## Consulta original:
+
+```sql
+SELECT * FROM articles WHERE category = ''
+```
+
+La consulta filtra los artículos según la categoría proporcionada en la URL. Esta entrada es vulnerable y puede ser manipulada para ejecutar consultas arbitrarias mediante la cláusula `UNION`.
+
+## 🔎 Observación sobre UNION
+
+La inyección SQL basada en `UNION` permite combinar resultados de múltiples sentencias `SELECT` en una sola salida. Es útil cuando el atacante quiere recuperar datos adicionales de otras tablas, como versiones, usuarios, contraseñas, etc.
+
+## Solución
+
+- **Vulnerabilidad:**
+    
+    El parámetro category no está debidamente validado ni parametrizado, lo que permite que un atacante inyecte instrucciones SQL adicionales.
+    Al explotar esta vulnerabilidad mediante la cláusula UNION SELECT, se pueden consultar tablas internas del sistema, como @@version, usada en MySQL y Microsoft para obtener información del motor de base de datos.
+    
+- **Paso 1: Determinar el número de columnas**
+    
+    Antes de usar `UNION`, necesitamos saber cuántas columnas devuelve la consulta original. Para eso, se usa la técnica `ORDER BY`.
+    
+    **Payloads utilizados:**
+    
+    ```sql
+    ' ORDER BY 1#
+    ' ORDER BY 2#
+    ' ORDER BY 3# <-Error
+    ```
+    
+    - Se incrementa el número hasta provocar un error.
+    - En este caso, `ORDER BY 3` falla, lo que indica que hay **2 columnas**.
+    
+- **Paso 2: Validar la inyección `UNION`**
+    
+    Una vez sabemos que hay 2 columnas, probamos una inyección básica para confirmar que `UNION SELECT` funciona correctamente en MySQL y Microsoft.
+    
+    **Payload de prueba:**
+    
+    ```sql
+    ' UNION SELECT 'ABC','NULL'#
+    ```
+    
+    - `'ABC'` y `'NULL'` son valores de prueba visibles en la respuesta.
+    - Esto confirma que la inyección funciona y el atacante puede controlar el contenido de la salida.
+
+- **Paso 3: Obtener la versión de** MySQL y Microsoft
+    
+    Finalmente, se usa una tabla específica de MySQL y Microsoft llamada `@@version`, que almacena información del sistema y del motor de base de datos.
+    **Payload final:**
+    
+    ```sql
+    'UNION SELECT NULL, @@version#
+    ```
+    
+    - `NULL` se utiliza para completar la primera columna (sin afectar la estructura).
+    - `@@version` devuelve el string con la versión de MySQL/MSSQL.
+
+## ✅ Resultado
+
+Con la inyección anterior, se muestra la versión de MySQL/MSSQL:
+
+```
+8.0.41-0ubuntu0.20.04.1
+```
+
+![Resultado de la consulta UNION mostrando la versión de MySQL/MSSQL obtenida mediante @@version](/writeups/portswigger/4_sql_injection_mysql_mssql_version/0d07238f-2601-4504-953d-7fc9876e6cf8.png)
+
+![Vista adicional del resultado de la inyección UNION con la versión de la base de datos](/writeups/portswigger/4_sql_injection_mysql_mssql_version/image.png)

