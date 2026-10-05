@@ -1,49 +1,209 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
-import { Award, ExternalLink, FileBadge, Medal, Star, Trophy } from "lucide-react"
+import { Award, Eye, ExternalLink, Flag, GraduationCap, ImageOff, Medal, Star, Trophy } from "lucide-react"
 import { achievementTypeLabels, achievementTypes, type Achievement } from "@/lib/achievements"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
-const typeIcons = { certificacion: Award, diploma: FileBadge, ctf: Trophy, insignia: Medal, reconocimiento: Star }
-const typeDots = { certificacion: "bg-red-400", diploma: "bg-amber-400", ctf: "bg-cyan-400", insignia: "bg-fuchsia-400", reconocimiento: "bg-emerald-400" }
+const typeIcons = {
+  certificacion: Award,
+  diploma: GraduationCap,
+  ctf: Flag,
+  insignia: Medal,
+  reconocimiento: Star,
+}
 
-function AchievementRow({ achievement, onOpen, featured = false }: { achievement: Achievement; onOpen: () => void; featured?: boolean }) {
+type AchievementCardProps = {
+  achievement: Achievement
+  onOpen: () => void
+}
+
+export function AchievementCard({ achievement, onOpen }: AchievementCardProps) {
   const Icon = typeIcons[achievement.type]
-  const content = (
-    <div className={cn("flex min-h-[76px] items-center gap-3 rounded-lg border bg-gray-900/70 px-3 py-2.5 transition-colors", featured ? "border-red-500/35 hover:border-red-500/60" : "border-gray-800", achievement.file && "hover:bg-gray-900") }>
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-red-500/10 text-red-400"><Icon className="size-4" aria-hidden="true" /></span>
-      <span className="min-w-0 flex-1">
-        <span className="block line-clamp-2 text-sm font-semibold leading-tight text-white">{achievement.name}</span>
-        <span className="mt-1 block truncate text-xs text-gray-500">{achievement.issuer}{achievement.date && ` · ${achievement.date}`}</span>
-      </span>
-      <span className="flex shrink-0 items-center gap-1.5 text-[10px] text-gray-600"><span className={cn("size-1.5 rounded-full", typeDots[achievement.type])} />{!achievement.file && <span className="rounded-full border border-gray-700 px-1.5 py-0.5 text-gray-500">Próximamente</span>}</span>
-    </div>
+  const hasFile = Boolean(achievement.file)
+
+  return (
+    <Card
+      onClick={() => hasFile && onOpen()}
+      className={cn(
+        "group bg-gray-900 border-gray-800 transition-colors",
+        hasFile ? "cursor-pointer hover:border-red-500" : "opacity-90",
+      )}
+    >
+      <CardContent className="pt-6 pb-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600/10 border border-red-600/30">
+            <Icon className="h-6 w-6 text-red-500" />
+          </div>
+          {hasFile ? (
+            <span className="flex items-center gap-1 text-xs text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Eye className="h-3.5 w-3.5" />
+              Ver diploma
+            </span>
+          ) : (
+            <Badge className="bg-gray-800 text-gray-500 border border-gray-700 text-[10px]">
+              Próximamente
+            </Badge>
+          )}
+        </div>
+        <p className="font-bold text-white mt-4">{achievement.name}</p>
+        <p className="text-sm text-gray-400">{achievement.issuer}</p>
+        {(achievement.date || achievement.credentialId) && (
+          <div className="mt-3 flex items-center justify-between">
+            {achievement.date ? <span className="text-xs text-gray-500">{achievement.date}</span> : <span />}
+            {achievement.credentialId && (
+              <span className="text-[10px] text-gray-600 font-mono">ID: {achievement.credentialId}</span>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
-  return achievement.file ? <button type="button" onClick={onOpen} className="group block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950">{content}</button> : content
 }
 
 function AchievementDialog({ selected, onClose }: { selected: Achievement | null; onClose: () => void }) {
-  return <Dialog open={Boolean(selected)} onOpenChange={(open) => !open && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto border-gray-800 bg-gray-950 text-white sm:max-w-3xl">{selected && <><DialogHeader><DialogTitle>{selected.name}</DialogTitle><DialogDescription className="text-gray-400">{selected.issuer}{selected.date && ` · ${selected.date}`}</DialogDescription></DialogHeader><div className="flex flex-col gap-5">{selected.description && <p className="text-sm leading-relaxed text-gray-300">{selected.description}</p>}{selected.credentialId && <p className="text-xs text-gray-500">ID de credencial: <span className="font-mono text-gray-300">{selected.credentialId}</span></p>}{selected.file && (selected.isPdf ? <iframe title={`Documento de ${selected.name}`} src={selected.file} className="h-[55vh] w-full rounded-lg border border-gray-800 bg-white" /> : <img src={selected.file} alt={`Documento de ${selected.name}`} className="max-h-[55vh] w-full rounded-lg border border-gray-800 object-contain" />)}<div className="flex flex-wrap gap-3">{selected.credentialUrl && <Button asChild className="bg-red-600 hover:bg-red-500"><Link href={selected.credentialUrl} target="_blank" rel="noopener noreferrer">Verificar credencial <ExternalLink data-icon="inline-end" /></Link></Button>}{selected.file && <Button asChild variant="outline" className="border-gray-700 text-gray-300"><Link href={selected.file} target="_blank" rel="noopener noreferrer">Abrir documento <ExternalLink data-icon="inline-end" /></Link></Button>}</div></div></>}</DialogContent></Dialog>
+  return (
+    <Dialog open={Boolean(selected)} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Award className="h-5 w-5 text-red-500" />
+            {selected?.name}
+            <span className="text-sm font-normal text-gray-400">· {selected?.issuer}</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="rounded-lg border border-gray-800 bg-gray-950 overflow-hidden">
+          {selected?.file ? (
+            selected.isPdf ? (
+              <iframe src={selected.file} title={`Diploma ${selected.name}`} className="w-full h-[60vh]" />
+            ) : (
+              <div className="relative w-full h-[60vh]">
+                <Image
+                  src={selected.file}
+                  alt={`Diploma de ${selected.name} emitido por ${selected.issuer}`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            )
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-2 py-16 text-gray-500">
+              <ImageOff className="h-10 w-10" />
+              <p>Diploma no disponible todavía.</p>
+            </div>
+          )}
+        </div>
+        {(selected?.file || selected?.credentialUrl) && (
+          <div className="flex flex-wrap justify-end gap-3">
+            {selected?.credentialUrl && (
+              <Button asChild className="bg-red-600 hover:bg-red-500">
+                <Link href={selected.credentialUrl} target="_blank" rel="noopener noreferrer">
+                  Verificar credencial
+                  <ExternalLink data-icon="inline-end" />
+                </Link>
+              </Button>
+            )}
+            {selected?.file && (
+              <Button
+                variant="outline"
+                className="border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
+                asChild
+              >
+                <a href={selected.file} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Abrir en pestaña nueva
+                </a>
+              </Button>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 export function FeaturedAchievements({ items }: { items: Achievement[] }) {
   const [selected, setSelected] = useState<Achievement | null>(null)
   const featured = items.filter((item) => item.highlight).slice(0, 2)
-  return <><div className="grid grid-cols-1 gap-3 md:grid-cols-3">{featured.map((item) => <AchievementRow key={item.id} achievement={item} featured onOpen={() => setSelected(item)} />)}<Link href="/logros" className="flex min-h-[76px] items-center gap-3 rounded-lg border border-dashed border-red-500/60 bg-gray-900/60 px-3 py-2.5 transition-colors hover:border-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"><span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-red-500/10 text-red-400"><Trophy className="size-4" /></span><span><span className="block text-sm font-semibold text-white">Ver todos los logros</span><span className="block text-xs text-gray-500">{items.length} en total</span></span></Link></div><AchievementDialog selected={selected} onClose={() => setSelected(null)} /></>
+
+  return (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {featured.map((item) => (
+          <AchievementCard key={item.id} achievement={item} onOpen={() => setSelected(item)} />
+        ))}
+        <Link
+          href="/logros"
+          className="group flex min-h-full flex-col rounded-lg border border-dashed border-red-500/60 bg-gray-900/60 p-5 transition-colors hover:border-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600/10 border border-red-600/30">
+              <Trophy className="h-6 w-6 text-red-500" />
+            </div>
+          </div>
+          <p className="font-bold text-white mt-4">Ver todos los logros</p>
+          <p className="text-sm text-gray-400">{items.length} en total</p>
+        </Link>
+      </div>
+      <AchievementDialog selected={selected} onClose={() => setSelected(null)} />
+    </>
+  )
 }
 
 export function AchievementsGrid({ items }: { items: Achievement[] }) {
   const [activeType, setActiveType] = useState<"todos" | Achievement["type"]>("todos")
   const [selected, setSelected] = useState<Achievement | null>(null)
   const sorted = useMemo(() => [...items].sort((a, b) => b.sortDate.localeCompare(a.sortDate)), [items])
-  const filtered = useMemo(() => activeType === "todos" ? sorted : sorted.filter((item) => item.type === activeType), [activeType, sorted])
+  const filtered = useMemo(
+    () => (activeType === "todos" ? sorted : sorted.filter((item) => item.type === activeType)),
+    [activeType, sorted],
+  )
   const featured = activeType === "todos" ? sorted.filter((item) => item.highlight).slice(0, 2) : []
   const visible = activeType === "todos" ? filtered.filter((item) => !item.highlight) : filtered
-  return <div className="flex flex-col gap-6">{featured.length > 0 && <section aria-labelledby="destacados-title"><div className="mb-3 flex items-center gap-2"><Trophy className="size-4 text-red-400" /><h2 id="destacados-title" className="text-lg font-semibold text-white">Destacados</h2></div><div className="grid grid-cols-1 gap-3 md:grid-cols-2">{featured.map((item) => <AchievementRow key={item.id} achievement={item} featured onOpen={() => setSelected(item)} />)}</div></section>}<section aria-labelledby="mas-logros-title"><div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><h2 id="mas-logros-title" className="text-lg font-semibold text-white">{activeType === "todos" ? "Más logros" : achievementTypeLabels[activeType]}</h2><div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar logros"><Button type="button" size="sm" variant={activeType === "todos" ? "default" : "outline"} onClick={() => setActiveType("todos")} className={cn("h-7 px-2.5 text-xs", activeType === "todos" ? "bg-red-600 hover:bg-red-500" : "border-gray-700 text-gray-300")}>Todos ({items.length})</Button>{achievementTypes.map((type) => { const count = items.filter((item) => item.type === type).length; return count > 0 && <Button key={type} type="button" size="sm" variant={activeType === type ? "default" : "outline"} onClick={() => setActiveType(type)} className={cn("h-7 px-2.5 text-xs", activeType === type ? "bg-red-600 hover:bg-red-500" : "border-gray-700 text-gray-300")}>{achievementTypeLabels[type]} ({count})</Button> })}</div></div><div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{visible.map((item) => <AchievementRow key={item.id} achievement={item} onOpen={() => setSelected(item)} />)}</div></section><AchievementDialog selected={selected} onClose={() => setSelected(null)} /></div>
+
+  return (
+    <div className="flex flex-col gap-6">
+      {featured.length > 0 && (
+        <section aria-labelledby="destacados-title">
+          <div className="mb-3 flex items-center gap-2">
+            <Trophy className="size-4 text-red-400" />
+            <h2 id="destacados-title" className="text-lg font-semibold text-white">Destacados</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {featured.map((item) => (
+              <AchievementCard key={item.id} achievement={item} onOpen={() => setSelected(item)} />
+            ))}
+          </div>
+        </section>
+      )}
+      <section aria-labelledby="mas-logros-title">
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 id="mas-logros-title" className="text-lg font-semibold text-white">
+            {activeType === "todos" ? "Más logros" : achievementTypeLabels[activeType]}
+          </h2>
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar logros">
+            <Button type="button" size="sm" variant={activeType === "todos" ? "default" : "outline"} onClick={() => setActiveType("todos")} className={cn("h-7 px-2.5 text-xs", activeType === "todos" ? "bg-red-600 hover:bg-red-500" : "border-gray-700 text-gray-300")}>Todos ({items.length})</Button>
+            {achievementTypes.map((type) => {
+              const count = items.filter((item) => item.type === type).length
+              return count > 0 ? <Button key={type} type="button" size="sm" variant={activeType === type ? "default" : "outline"} onClick={() => setActiveType(type)} className={cn("h-7 px-2.5 text-xs", activeType === type ? "bg-red-600 hover:bg-red-500" : "border-gray-700 text-gray-300")}>{achievementTypeLabels[type]} ({count})</Button> : null
+            })}
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {visible.map((item) => (
+            <AchievementCard key={item.id} achievement={item} onOpen={() => setSelected(item)} />
+          ))}
+        </div>
+      </section>
+      <AchievementDialog selected={selected} onClose={() => setSelected(null)} />
+    </div>
+  )
 }
 
 export default AchievementsGrid
