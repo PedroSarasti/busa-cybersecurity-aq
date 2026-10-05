@@ -26,7 +26,7 @@ import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { CvDownload } from "@/components/cv-download"
 import { FeaturedAchievements } from "@/components/achievements_grid"
-import { achievements } from "@/lib/achievements"
+import { getAchievements } from "@/lib/achievements_files"
 import Image from "next/image"
 
 export const metadata: Metadata = {
@@ -305,7 +305,7 @@ export default function SobreMiPage() {
               Haz clic en una certificación para ver el diploma correspondiente.
             </p>
           </div>
-          <FeaturedAchievements items={achievements} />
+          <FeaturedAchievements items={getAchievements()} />
         </section>
 
         {/* Experiencia (timeline) */}
