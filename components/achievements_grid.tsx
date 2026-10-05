@@ -22,9 +22,10 @@ const typeIcons = {
 type AchievementCardProps = {
   achievement: Achievement
   onOpen: () => void
+  variant?: "featured"
 }
 
-export function AchievementCard({ achievement, onOpen }: AchievementCardProps) {
+export function AchievementCard({ achievement, onOpen, variant }: AchievementCardProps) {
   const Icon = typeIcons[achievement.type]
   const hasFile = Boolean(achievement.file)
 
@@ -32,11 +33,12 @@ export function AchievementCard({ achievement, onOpen }: AchievementCardProps) {
     <Card
       onClick={() => hasFile && onOpen()}
       className={cn(
-        "group bg-gray-900 border-gray-800 transition-colors",
+        "group h-full flex flex-col bg-gray-900 border-gray-800 transition-colors",
+        variant === "featured" && "border-red-500/40 shadow-[0_0_24px_rgba(220,38,38,0.08)]",
         hasFile ? "cursor-pointer hover:border-red-500" : "opacity-90",
       )}
     >
-      <CardContent className="pt-6 pb-5">
+      <CardContent className="flex flex-1 flex-col pt-6 pb-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600/10 border border-red-600/30">
             <Icon className="h-6 w-6 text-red-500" />
@@ -54,11 +56,14 @@ export function AchievementCard({ achievement, onOpen }: AchievementCardProps) {
         </div>
         <p className="font-bold text-white mt-4">{achievement.name}</p>
         <p className="text-sm text-gray-400">{achievement.issuer}</p>
+        {variant === "featured" && achievement.description && (
+          <p className="mt-1 line-clamp-2 text-sm text-gray-400">{achievement.description}</p>
+        )}
         {(achievement.date || achievement.credentialId) && (
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-auto flex items-center justify-between pt-3">
             {achievement.date ? <span className="text-xs text-gray-500">{achievement.date}</span> : <span />}
             {achievement.credentialId && (
-              <span className="text-[10px] text-gray-600 font-mono">ID: {achievement.credentialId}</span>
+              <span className="text-xs text-gray-500 font-mono">ID: {achievement.credentialId}</span>
             )}
           </div>
         )}
@@ -140,7 +145,7 @@ export function FeaturedAchievements({ items }: { items: Achievement[] }) {
         ))}
         <Link
           href="/logros"
-          className="group flex min-h-full flex-col rounded-lg border border-dashed border-red-500/60 bg-gray-900/60 p-5 transition-colors hover:border-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
+          className="group flex h-full min-h-full flex-col rounded-lg border border-dashed border-red-500/60 bg-gray-900/60 p-6 transition-colors hover:border-red-400 hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600/10 border border-red-600/30">
@@ -168,16 +173,23 @@ export function AchievementsGrid({ items }: { items: Achievement[] }) {
   const visible = activeType === "todos" ? filtered.filter((item) => !item.highlight) : filtered
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar logros">
+        <Button type="button" size="sm" variant={activeType === "todos" ? "default" : "outline"} onClick={() => setActiveType("todos")} className={cn("h-7 px-2.5 text-xs", activeType === "todos" ? "bg-red-600 hover:bg-red-500" : "border-gray-700 text-gray-300")}>Todos ({items.length})</Button>
+        {achievementTypes.map((type) => {
+          const count = items.filter((item) => item.type === type).length
+          return count > 0 ? <Button key={type} type="button" size="sm" variant={activeType === type ? "default" : "outline"} onClick={() => setActiveType(type)} className={cn("h-7 px-2.5 text-xs", activeType === type ? "bg-red-600 hover:bg-red-500" : "border-gray-700 text-gray-300")}>{achievementTypeLabels[type]} ({count})</Button> : null
+        })}
+      </div>
       {featured.length > 0 && (
         <section aria-labelledby="destacados-title">
           <div className="mb-3 flex items-center gap-2">
             <Trophy className="size-4 text-red-400" />
             <h2 id="destacados-title" className="text-lg font-semibold text-white">Destacados</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {featured.map((item) => (
-              <AchievementCard key={item.id} achievement={item} onOpen={() => setSelected(item)} />
+          <AchievementCard key={item.id} achievement={item} variant="featured" onOpen={() => setSelected(item)} />
             ))}
           </div>
         </section>
@@ -185,17 +197,10 @@ export function AchievementsGrid({ items }: { items: Achievement[] }) {
       <section aria-labelledby="mas-logros-title">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 id="mas-logros-title" className="text-lg font-semibold text-white">
-            {activeType === "todos" ? "Más logros" : achievementTypeLabels[activeType]}
+            {activeType === "todos" ? "Más logros" : `${achievementTypeLabels[activeType]} (${filtered.length})`}
           </h2>
-          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar logros">
-            <Button type="button" size="sm" variant={activeType === "todos" ? "default" : "outline"} onClick={() => setActiveType("todos")} className={cn("h-7 px-2.5 text-xs", activeType === "todos" ? "bg-red-600 hover:bg-red-500" : "border-gray-700 text-gray-300")}>Todos ({items.length})</Button>
-            {achievementTypes.map((type) => {
-              const count = items.filter((item) => item.type === type).length
-              return count > 0 ? <Button key={type} type="button" size="sm" variant={activeType === type ? "default" : "outline"} onClick={() => setActiveType(type)} className={cn("h-7 px-2.5 text-xs", activeType === type ? "bg-red-600 hover:bg-red-500" : "border-gray-700 text-gray-300")}>{achievementTypeLabels[type]} ({count})</Button> : null
-            })}
-          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {visible.map((item) => (
             <AchievementCard key={item.id} achievement={item} onOpen={() => setSelected(item)} />
           ))}
