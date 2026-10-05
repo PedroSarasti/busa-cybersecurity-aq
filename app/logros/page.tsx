@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react"
 import { SiteFooter } from "@/components/site-footer"
 import { SiteHeader } from "@/components/site-header"
 import { AchievementsGrid } from "@/components/achievements_grid"
-import { achievements } from "@/lib/achievements"
+import { getAchievements } from "@/lib/achievements_files"
 
 export const metadata: Metadata = {
   title: "Logros | BUSA Cybersecurity",
@@ -12,6 +12,8 @@ export const metadata: Metadata = {
 }
 
 export default function LogrosPage() {
+  const achievements = getAchievements()
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <SiteHeader />
