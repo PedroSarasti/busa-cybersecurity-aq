@@ -21,12 +21,12 @@ import {
   Target,
   Search,
   FileSearch,
-  Trophy,
 } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { CvDownload } from "@/components/cv-download"
-import { Certifications, type Certification } from "@/components/certifications"
+import { FeaturedAchievements } from "@/components/achievements_grid"
+import { achievements } from "@/lib/achievements"
 import Image from "next/image"
 
 export const metadata: Metadata = {
@@ -64,29 +64,6 @@ const languages = [
   { name: "C# / .NET", icon: Code2 },
   { name: "SQL", icon: Code2 },
   { name: "JavaScript", icon: Code2 },
-]
-
-const certifications: Certification[] = [
-  {
-    name: "eWPT",
-    issuer: "INE Security",
-    date: "Jun. 2026",
-    credentialId: "185433777",
-    // Coloca el archivo en /public/certificados/ewpt.png o .pdf y actualiza la ruta
-    file: "",
-  },
-  {
-    name: "CCST Cybersecurity",
-    issuer: "Cisco",
-    date: "Ago. 2024",
-    file: "",
-  },
-  {
-    name: "Diplomado Hacking Ético y Riesgos Cibernéticos",
-    issuer: "Univ. Sergio Arboleda & Colsubsidio",
-    date: "Mar. — May. 2026 · 80h",
-    file: "",
-  },
 ]
 
 const education = [
@@ -319,24 +296,16 @@ export default function SobreMiPage() {
 
         {/* Certificaciones */}
         <section>
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                <Award className="h-6 w-6 text-red-500" />
-                Certificaciones & Diplomas
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Haz clic en una certificación para ver el diploma correspondiente.
-              </p>
-            </div>
-            <Button asChild variant="outline" className="w-full border-red-500 text-red-400 hover:bg-red-500 hover:text-white sm:w-auto">
-              <Link href="/logros">
-                <Trophy data-icon="inline-start" />
-                Ver todos los logros
-              </Link>
-            </Button>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <Award className="h-6 w-6 text-red-500" />
+              Certificaciones & Diplomas
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Haz clic en una certificación para ver el diploma correspondiente.
+            </p>
           </div>
-          <Certifications items={certifications} />
+          <FeaturedAchievements items={achievements} />
         </section>
 
         {/* Experiencia (timeline) */}
