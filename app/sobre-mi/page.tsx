@@ -25,7 +25,8 @@ import {
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { CvDownload } from "@/components/cv-download"
-import { Certifications, type Certification } from "@/components/certifications"
+import { FeaturedAchievements } from "@/components/achievements_grid"
+import { achievements } from "@/lib/achievements"
 import Image from "next/image"
 
 export const metadata: Metadata = {
@@ -63,29 +64,6 @@ const languages = [
   { name: "C# / .NET", icon: Code2 },
   { name: "SQL", icon: Code2 },
   { name: "JavaScript", icon: Code2 },
-]
-
-const certifications: Certification[] = [
-  {
-    name: "eWPT",
-    issuer: "INE Security",
-    date: "Jun. 2026",
-    credentialId: "185433777",
-    // Coloca el archivo en /public/certificados/ewpt.png o .pdf y actualiza la ruta
-    file: "",
-  },
-  {
-    name: "CCST Cybersecurity",
-    issuer: "Cisco",
-    date: "Ago. 2024",
-    file: "",
-  },
-  {
-    name: "Diplomado Hacking Ético y Riesgos Cibernéticos",
-    issuer: "Univ. Sergio Arboleda & Colsubsidio",
-    date: "Mar. — May. 2026 · 80h",
-    file: "",
-  },
 ]
 
 const education = [
@@ -327,7 +305,7 @@ export default function SobreMiPage() {
               Haz clic en una certificación para ver el diploma correspondiente.
             </p>
           </div>
-          <Certifications items={certifications} />
+          <FeaturedAchievements items={achievements} />
         </section>
 
         {/* Experiencia (timeline) */}
