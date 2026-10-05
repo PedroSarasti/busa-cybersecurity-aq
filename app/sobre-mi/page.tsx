@@ -21,6 +21,7 @@ import {
   Target,
   Search,
   FileSearch,
+  Trophy,
 } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
@@ -318,14 +319,22 @@ export default function SobreMiPage() {
 
         {/* Certificaciones */}
         <section>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Award className="h-6 w-6 text-red-500" />
-              Certificaciones & Diplomas
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Haz clic en una certificación para ver el diploma correspondiente.
-            </p>
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <Award className="h-6 w-6 text-red-500" />
+                Certificaciones & Diplomas
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Haz clic en una certificación para ver el diploma correspondiente.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="w-full border-red-500 text-red-400 hover:bg-red-500 hover:text-white sm:w-auto">
+              <Link href="/logros">
+                <Trophy data-icon="inline-start" />
+                Ver todos los logros
+              </Link>
+            </Button>
           </div>
           <Certifications items={certifications} />
         </section>
