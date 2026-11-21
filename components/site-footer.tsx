@@ -86,7 +86,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/herramientas" className="hover:text-red-400 transition-colors">
+                <Link href="/pentesting/herramientas" className="hover:text-red-400 transition-colors">
                   Herramientas
                 </Link>
               </li>

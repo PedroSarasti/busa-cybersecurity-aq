@@ -8,6 +8,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { sections, getSubSection, getAccent } from "@/lib/navigation"
 import { getArticles } from "@/lib/content"
 import { cn } from "@/lib/utils"
+import { UnderConstruction } from "@/components/under_construction"
 import { PortswiggerLabsLayout } from "@/components/portswigger_labs_layout"
 
 /** Formatea una fecha ISO (YYYY-MM-DD) a un texto legible en español. */
@@ -91,7 +92,9 @@ export default async function SubSectionPage({
         </div>
       </section>
 
-      {sectionSlug === "writeups" && subSlug === "portswigger" ? (
+      {articles.length === 0 ? (
+        <UnderConstruction title={subsection.name} moduleSlug={`${section.slug}/${subsection.slug}`} accent={accent} />
+      ) : sectionSlug === "writeups" && subSlug === "portswigger" ? (
         <section className="py-16 px-4 flex-1">
           <PortswiggerLabsLayout
             articles={articles}

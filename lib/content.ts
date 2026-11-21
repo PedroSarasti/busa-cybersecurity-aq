@@ -181,3 +181,11 @@ export function getAllSubArticleParams(): { section: string; subsection: string;
 
   return params
 }
+/**
+ * true si la sección (o la subsección indicada) tiene al menos un artículo publicado.
+ * Se usa para mostrar la página "en construcción" mientras no haya contenido.
+ */
+export function hasContent(section: string, subsections: string[], subsection?: string): boolean {
+  const slugs = subsection ? [subsection] : subsections
+  return slugs.some((sub) => getArticles(section, sub).length > 0)
+}
