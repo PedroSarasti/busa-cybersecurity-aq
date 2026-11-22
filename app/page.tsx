@@ -41,7 +41,7 @@ export default function HomePage() {
       title: "Herramientas Esenciales para Pentesting 2024",
       excerpt: "Revisión actualizada de las herramientas más importantes que todo pentester debe conocer y dominar.",
       category: "Herramientas",
-      href: "/herramientas",
+      href: "/pentesting/herramientas",
       date: "2024-01-10",
       readTime: "6 min",
       views: 2100,

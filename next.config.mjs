@@ -9,7 +9,15 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
- 
+
+  async redirects() {
+    // "Herramientas" pasó de ser un menú propio a una subsección de Pentesting.
+    return [
+      { source: "/herramientas", destination: "/pentesting/herramientas", permanent: true },
+      { source: "/herramientas/:path*", destination: "/pentesting/herramientas", permanent: true },
+    ]
+  },
+
   eslint: {
     ignoreDuringBuilds: true,
   },

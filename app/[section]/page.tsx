@@ -3,6 +3,8 @@ import Link from "next/link"
 import type { Metadata } from "next"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, FolderOpen } from "lucide-react"
+import { UnderConstruction } from "@/components/under_construction"
+import { hasContent } from "@/lib/content"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { SectionTerminal } from "@/components/section-terminal"
@@ -44,6 +46,10 @@ export default async function SectionPage({
 
   const accent = getAccent(section)
   const subsections = section.subsections ?? []
+  const published = hasContent(
+    section.slug,
+    subsections.map((s) => s.slug),
+  )
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
@@ -75,7 +81,7 @@ export default async function SectionPage({
             {section.description}
           </p>
 
-          {subsections.length > 0 && (
+          {published && subsections.length > 0 && (
             <div className="mt-8 flex justify-center">
               <a
                 href="#categorias"
@@ -91,7 +97,7 @@ export default async function SectionPage({
           )}
 
           {/* Elemento innovador: terminal animada temática */}
-          {subsections.length > 0 && (
+          {published && subsections.length > 0 && (
             <div className="mt-12">
               <SectionTerminal
                 moduleName={section.name}
@@ -105,6 +111,9 @@ export default async function SectionPage({
       </section>
 
       {/* Subsections */}
+      {!published ? (
+        <UnderConstruction title={section.name} moduleSlug={section.slug} accent={accent} upcoming={subsections} />
+      ) : (
       <section id="categorias" className="py-16 px-4 flex-1 scroll-mt-20">
         <div className="container mx-auto">
           {subsections.length > 0 ? (
@@ -159,6 +168,7 @@ export default async function SectionPage({
           )}
         </div>
       </section>
+      )}
 
       <SiteFooter />
     </div>
