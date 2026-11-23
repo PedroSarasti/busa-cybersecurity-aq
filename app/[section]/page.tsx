@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, FolderOpen } from "lucide-react"
 import { UnderConstruction } from "@/components/under_construction"
-import { hasContent, getArticles } from "@/lib/content"
+import { hasContent } from "@/lib/content"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { SectionTerminal } from "@/components/section-terminal"
@@ -115,43 +115,47 @@ export default async function SectionPage({
         <UnderConstruction title={section.name} moduleSlug={section.slug} accent={accent} upcoming={subsections} />
       ) : (
       <section id="categorias" className="py-16 px-4 flex-1 scroll-mt-20">
-        <div className="container mx-auto max-w-4xl">
+        <div className="container mx-auto">
           {subsections.length > 0 ? (
             <>
-              <h2 className="text-2xl font-semibold text-white mb-2">Categorías de {section.name}</h2>
-              <p className="text-gray-400 mb-8">Entra a una categoría para ver sus artículos.</p>
-              <ul className="divide-y divide-gray-800 border-y border-gray-800">
+              <h2 className="text-3xl font-bold text-white text-center mb-3">Categorías Principales</h2>
+              <p className="text-center text-gray-400 mb-12">
+                Explora el contenido organizado de {section.name}.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {subsections.map((sub) => {
                   const SubIcon = sub.icon
-                  const total = getArticles(section.slug, sub.slug).length
                   return (
-                    <li key={sub.slug}>
-                      <Link
-                        href={`${section.href}/${sub.slug}`}
-                        className="group flex items-start gap-4 py-4 transition-colors hover:bg-gray-900/60"
+                    <Link key={sub.slug} href={`${section.href}/${sub.slug}`} className="group">
+                      <Card
+                        className={cn(
+                          "h-full bg-gray-900 border-gray-800 transition-all duration-300",
+                          accent.cardHover,
+                          accent.glow,
+                        )}
                       >
-                        <span
-                          className={cn(
-                            "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border",
-                            accent.iconBox,
-                          )}
-                        >
-                          <SubIcon className={cn("h-5 w-5", accent.text)} />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className={cn("block font-medium text-white transition-colors", accent.titleHover)}>
-                            {sub.name}
+                        <CardHeader className="items-center text-center">
+                          <span
+                            className={cn(
+                              "flex h-14 w-14 items-center justify-center rounded-xl border transition-colors mb-2",
+                              accent.iconBox,
+                              accent.iconHoverBg,
+                            )}
+                          >
+                            <SubIcon className={cn("h-7 w-7", accent.text)} />
                           </span>
-                          <span className="block text-sm text-gray-400 leading-relaxed">{sub.description}</span>
-                        </span>
-                        <span className="shrink-0 pt-0.5 font-mono text-xs text-gray-500">
-                          {total > 0 ? `${total} artículos` : "en construcción"}
-                        </span>
-                      </Link>
-                    </li>
+                          <CardTitle className={cn("text-white transition-colors", accent.titleHover)}>
+                            {sub.name}
+                          </CardTitle>
+                          <CardDescription className="text-gray-400 leading-relaxed">
+                            {sub.description}
+                          </CardDescription>
+                        </CardHeader>
+                      </Card>
+                    </Link>
                   )
                 })}
-              </ul>
+              </div>
             </>
           ) : (
             <div className="flex flex-col items-center justify-center text-center py-20">
