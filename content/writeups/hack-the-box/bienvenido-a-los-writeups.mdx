@@ -1,0 +1,40 @@
+---
+title: "Bienvenido a los Writeups de Hack The Box"
+description: "Artículo de ejemplo que muestra cómo documentar la resolución de una máquina de HTB con el sistema de contenido MDX."
+date: "2026-06-30"
+tags: ["htb", "ejemplo", "metodología", "writeup"]
+---
+
+Este es un artículo de ejemplo para mostrar cómo funciona el sistema de contenido en MDX. Para publicar un nuevo writeup basta con crear un archivo `.mdx` dentro de la carpeta correspondiente en `/content` — no hace falta tocar ningún componente de React.
+
+## Reconocimiento
+
+El primer paso en cualquier máquina es el reconocimiento. Comenzamos con un escaneo de puertos con Nmap:
+
+```bash
+nmap -sC -sV -oN nmap/initial 10.10.10.10
+```
+
+Los resultados nos muestran los servicios expuestos y sus versiones, lo que nos permite planificar el siguiente paso.
+
+## Enumeración
+
+Una vez identificados los servicios, enumeramos cada uno en profundidad. Por ejemplo, para un servidor web:
+
+- Revisar el código fuente de las páginas.
+- Fuzzear directorios y archivos ocultos.
+- Identificar tecnologías y posibles vulnerabilidades conocidas.
+
+> Documentar cada hallazgo con capturas y comandos exactos facilita reproducir el proceso más adelante.
+
+## Explotación
+
+Con la información recopilada, buscamos un vector de entrada. Aquí explicarías la vulnerabilidad concreta, el payload utilizado y cómo obtuviste una shell inicial.
+
+## Escalada de privilegios
+
+Finalmente, documentamos cómo pasamos de un usuario sin privilegios a `root`, detallando la técnica empleada y las lecciones aprendidas.
+
+## Conclusión
+
+Este formato es totalmente escalable: puedes añadir tantos artículos como quieras y aparecerán automáticamente listados en su subsección correspondiente. Usa encabezados, listas, citas y bloques de código para estructurar tus apuntes de forma clara.

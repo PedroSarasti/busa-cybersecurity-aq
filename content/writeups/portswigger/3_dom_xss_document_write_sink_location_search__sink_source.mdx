@@ -1,0 +1,86 @@
+---
+title: "Sink y Source"
+description: "Explicación de los conceptos de source y sink en vulnerabilidades DOM XSS, con ejemplos de código y su relación en el flujo de explotación."
+date: "2026-07-13"
+---
+
+## 🧠 ¿Qué es un *Source*?
+
+Un **source** (fuente) es **cualquier parte del código que puede recibir datos controlados por el usuario**.
+
+### 🔸 Ejemplos comunes de *sources*:
+
+- `location.href`
+- `location.search`
+- `document.URL`
+- `document.referrer`
+- `window.name`
+- `localStorage`, `sessionStorage`
+- Input de formularios o parámetros de URL
+
+**Ejemplo:**
+
+```jsx
+var search = window.location.search; // ← el usuario controla esto
+
+```
+
+Aquí, `window.location.search` es un **source**, porque contiene datos que el usuario puede modificar escribiendo directamente en la URL.
+
+---
+
+## 🧪 ¿Qué es un *Sink*?
+
+Un **sink** (sumidero) es **el lugar donde los datos terminan siendo utilizados** en el DOM, en el HTML o en el JavaScript **de forma peligrosa**.
+
+### 🔸 Ejemplos comunes de *sinks*:
+
+- `document.write()`
+- `document.innerHTML`
+- `element.outerHTML`
+- `eval()`
+- `setTimeout("...")`
+- `element.setAttribute("onclick", ...)`
+- `location.href = ...`
+
+**Ejemplo:**
+
+```jsx
+document.write(search); // ← este es el sink
+
+```
+
+Si `search` viene del usuario (source), y se pasa sin sanitización a `document.write()` (sink), hay riesgo de XSS.
+
+---
+
+## 🛠️ ¿Cómo se relacionan?
+
+El flujo de una vulnerabilidad **DOM XSS** ocurre **cuando un *source* controlado por el usuario es pasado a un *sink* vulnerable sin validación ni sanitización**.
+
+### 🧷 Ejemplo completo:
+
+```jsx
+var query = (new URLSearchParams(window.location.search)).get("q"); // Source
+document.write("<p>" + query + "</p>"); // Sink
+
+```
+
+Si un atacante usa esta URL:
+
+```
+https://victima.com/page?q=<script>alert(1)</script>
+
+```
+
+Entonces el script se ejecutará, porque el contenido del parámetro `q` (source) fue pasado sin validar a `document.write()` (sink).
+
+---
+
+## ✅ ¿Por qué es importante en ciberseguridad?
+
+Porque:
+
+- Nos ayuda a identificar rápidamente **los puntos vulnerables del código**.
+- Al hacer pentesting, sabemos **qué propiedades observar en el DOM**.
+- En reportes profesionales (como los de eWPT), se espera que expliques la relación entre source y sink para respaldar la explotación de una vulnerabilidad.

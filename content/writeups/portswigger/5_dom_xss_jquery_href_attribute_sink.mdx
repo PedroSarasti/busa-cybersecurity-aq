@@ -1,0 +1,85 @@
+---
+title: "#5 - DOM XSS in jQuery anchor href attribute sink using location.search source"
+description: "Ejecución de JavaScript mediante el esquema javascript: inyectado en el parámetro returnPath, que jQuery asigna sin sanitizar al atributo href de un enlace."
+date: "2026-07-13"
+tags: ["portswigger", "cross-site-scripting", "dom-xss", "jquery", "apprentice"]
+category: "cross-site-scripting"
+difficulty: "APPRENTICE"
+---
+
+**Laboratorio:** [Lab: DOM XSS in jQuery anchor href attribute sink using location.search source | Web Security Academy](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-jquery-href-attribute-sink)
+
+- Objetivo: Conseguir ejecutar JavaScript (p. ej. obtener `document.cookie`) aprovechando que un parámetro de URL (`returnPath`) se inserta en el atributo `href` de un enlace (por jQuery), permitiendo la utilización del esquema `javascript:`.
+
+## **Análisis inicial**
+
+- Al navegar al apartado de *feedback* se encuentra un formulario de retroalimentación. Tras enviar feedback, la interfaz muestra un botón/ enlace “Back” cuyo `href` se construye a partir del parámetro `returnPath` presente en la query string:
+    
+    ```
+    ?returnPath=/
+    ```
+    
+    Se observa que el valor de `returnPath` se refleja en el DOM dentro del `href` del botón “Back”, sin validación ni sanitización aparente. Esto sugiere una **DOM-based XSS**: la entrada desde `location.search` se utiliza como fuente, y el *sink* es la asignación al atributo `href` (probablemente vía jQuery `.attr('href', value)` o similar).
+    
+
+## Solución
+
+1. Identificación del punto de entrada
+    - Ir a la sección **Feedback** y observar el botón/enlace “Back”.
+        
+        ![Botón enlace "Back" en la sección de feedback](/writeups/portswigger/5_dom_xss_jquery_href_attribute_sink/image.png)
+        
+    
+    - Comprobar cómo cambia el `href` cuando se modifica el parámetro `returnPath` en la URL.
+        
+        ![Cambio en el href del botón "Back" al modificar el parámetro returnPath](/writeups/portswigger/5_dom_xss_jquery_href_attribute_sink/image%201.png)
+        
+        ```
+        ?returnPath=libro
+        ```
+        
+
+1. Confirmar reflejo en DOM
+    - Modificar manualmente la URL (o enviar feedback que incluya returnPath si la aplicación lo hace automáticamente).
+    - Inspeccionar el elemento “Back” en el DOM (DevTools → Elements) y verificar que el `href` contiene exactamente el valor de `returnPath`.
+        
+        ![Inspección del elemento "Back" en DevTools mostrando el href reflejando el valor de returnPath](/writeups/portswigger/5_dom_xss_jquery_href_attribute_sink/image%202.png)
+        
+
+1. **Inyección del payload**
+    
+    Probar un payload que use el esquema `javascript:` para forzar la ejecución al hacer clic en el enlace. Payload de prueba:
+    
+    ```jsx
+    javascript:alert(document.cookie)
+    ```
+    
+    URL de prueba (sin codificar):
+    
+    ```
+    /feedback?returnPath=javascript:alert(document.cookie)
+    ```
+    
+    URL codificada (recomendado para enviar por querystring):
+    
+    ```
+    /feedback?returnPath=javascript%3Aalert(document.cookie)
+    ```
+    
+    - Actualiza la URL en el navegador con `returnPath=javascript:alert(document.cookie)`.
+    - Haz clic en el botón/enlace “Back”: el navegador ejecutará el `javascript:` y se mostrará la alerta con las cookies.
+    - ***Nota***
+        
+        👀 En algunos navegadores/entornos puede bloquearse `javascript:` en `href` por políticas del navegador o por sanitizadores; en este laboratorio el sink (jQuery `.attr('href', ...)`) no filtra el esquema, por eso la inyección es posible.
+        
+    
+    ![Payload javascript: inyectado en returnPath ejecutándose al hacer clic en el enlace "Back"](/writeups/portswigger/5_dom_xss_jquery_href_attribute_sink/image%203.png)
+    
+
+## ✅ Resultado
+
+Se ejecutó el `alert(document.cookie)` confirmando que el `href` acepta el esquema `javascript:` desde `location.search`, permitiendo ejecución de código arbitrario en contexto del DOM — confirmación de **DOM-based XSS (Reflected via href sink)**.
+
+![Alerta mostrando document.cookie ejecutada tras hacer clic en el enlace con el payload javascript: inyectado](/writeups/portswigger/5_dom_xss_jquery_href_attribute_sink/image%204.png)
+
+📌 **Nota importante:** Aunque el `alert(1)` es común para validación, en un escenario real un atacante podría robar cookies, sesiones o redirigir al usuario a sitios maliciosos.

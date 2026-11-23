@@ -1,0 +1,137 @@
+---
+title: "WriteUp - Bounty Hacker"
+description: "Writeup de la máquina Bounty Hacker de TryHackMe: acceso FTP anónimo, ataque de diccionario con Hydra por SSH y escalada de privilegios abusando de tar con GTFOBins."
+date: "2026-07-12"
+tags: ["tryhackme", "pentesting", "linux", "ftp", "gtfobins", "easy"]
+---
+
+Status: Completed
+Difficulty: Easy
+Platform: TryHackMe
+
+## Reconocimiento
+
+Iniciamos el reconocimiento con nmap:
+
+```bash
+nmap -sV -sC 10.67.176.84
+```
+
+![Resultado del escaneo nmap mostrando los puertos abiertos](/writeups/tryhackme/bounty_hacker/image.png)
+
+Podremos ver que tiene el puerto 21 abierto y con acceso anonymous activado, por lo que intentamos ingresar de esta manera
+
+```bash
+ftp 10.67.176.84
+```
+
+![Acceso anónimo por FTP](/writeups/tryhackme/bounty_hacker/image%201.png)
+
+## Enumeración
+
+Descargamos los dos ficheros para poder leerlos 
+
+```bash
+ftp> get locks.txt
+ftp> get task.txt
+```
+
+![Descarga de los archivos locks.txt y task.txt por FTP](/writeups/tryhackme/bounty_hacker/image%202.png)
+
+Al ingresar mediante ftp podremos evidenciar que hay dos archivos `locks.txt` y `task.txt`
+
+En el archivo `task.txt` podemos evidenciar que hay un posible nombre de usuario - `lin`
+
+![Contenido del archivo task.txt con el posible usuario lin](/writeups/tryhackme/bounty_hacker/image%203.png)
+
+En el archivo `locks.txt` podremos ver una posible Wordlist (lista de contraseñas)
+
+![Contenido del archivo locks.txt con la wordlist](/writeups/tryhackme/bounty_hacker/image%204.png)
+
+## Explotación
+
+Con esta información realizamos un ataque de diccionario sobre SSH con Hydra
+
+![Ataque de diccionario con Hydra sobre SSH](/writeups/tryhackme/bounty_hacker/image%205.png)
+
+Obtenemos la contraseña del usuario lin - `RedDr4gonSynd1cat3`
+
+Ingresamos mediante ssh 
+
+![Acceso por SSH con el usuario lin](/writeups/tryhackme/bounty_hacker/image%206.png)
+
+listamos los ficheros del directorio Desktop y podremos ver la primera FLAG `user.txt`
+
+![Listado del directorio Desktop mostrando user.txt](/writeups/tryhackme/bounty_hacker/image%207.png)
+
+FLAG USER:  `THM{CR1M3_SyNd1C4T3}`
+
+![Contenido de la flag de usuario](/writeups/tryhackme/bounty_hacker/image%208.png)
+
+## Escalada de privilegios
+
+Ahora vamos a escalar privilegios, lo primero que debemos validar es que puede ejecutar `lin` con permisos de root, con el siguiente comando:
+
+```bash
+sudo -l
+```
+
+![Resultado de sudo -l mostrando permisos sobre /bin/tar](/writeups/tryhackme/bounty_hacker/image%209.png)
+
+Con esto nos damos cuenta que `lin` puede ejecutar `/bin/tar` como root. Esto es explotable con GTFOBins:
+
+```bash
+sudo tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/bash
+```
+
+- Desglose del comando
+    
+    ---
+    
+    **`sudo tar`**
+    Ejecuta tar con privilegios de root, porque `sudo -l` nos mostró que lin puede correr `/bin/tar` como root.
+    
+    ---
+    
+    - **`cf /dev/null /dev/null`**
+    - `c` → crear un archivo tar
+    - `f /dev/null` → el archivo de salida es `/dev/null` (la papelera del sistema, descarta todo)
+    - `/dev/null` → el archivo a comprimir (también la papelera, no importa)
+    
+    Básicamente le decimos a tar que "comprima nada en ningún lado" — solo es para que el comando sea válido sintácticamente.
+    
+    ---
+    
+    - **`-checkpoint=1`**
+    Los checkpoints son puntos de control que tar usa para mostrar progreso. Al poner `=1` le decimos que ejecute un checkpoint después de procesar **cada 1 registro**, o sea, inmediatamente.
+    
+    ---
+    
+    - **`-checkpoint-action=exec=/bin/bash`**
+    Esta es la parte clave. Le dice a tar que cuando llegue a un checkpoint, ejecute una **acción**. En este caso la acción es ejecutar `/bin/bash`.
+    
+    Como tar está corriendo como **root** gracias a sudo, la bash que abre también es de **root**.
+    
+    ---
+    
+    ## Resumen del flujo
+    
+    ```
+    sudo tar → corre como root
+        → llega al checkpoint (inmediatamente)
+        → ejecuta /bin/bash como root
+        → obtienes shell de root 🎯
+    ```
+    
+    Esta técnica está documentada en **GTFOBins** (`https://gtfobins.github.io/gtfobins/tar/`) que es una base de datos de binarios Unix que pueden ser abusados para escalar privilegios.
+    
+
+![Ejecución del comando de GTFOBins obteniendo shell de root](/writeups/tryhackme/bounty_hacker/image%2010.png)
+
+Una vez obtenemos shell de root, nos dirigimos al directorio root y obtenemos la FLAG de usuario root
+
+![Listado del directorio root mostrando root.txt](/writeups/tryhackme/bounty_hacker/image%2011.png)
+
+FLAG ROOT: `THM{80UN7Y_h4cK3r}`
+
+![Contenido de la flag de root](/writeups/tryhackme/bounty_hacker/image%2012.png)

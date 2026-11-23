@@ -1,0 +1,103 @@
+---
+title: "#3 - DOM XSS in document.write sink using source location.search"
+description: "Explotación de una vulnerabilidad DOM XSS provocada por el uso inseguro de document.write() con el parámetro search de la URL como source."
+date: "2026-07-13"
+tags: ["portswigger", "cross-site-scripting", "dom-xss", "apprentice"]
+category: "cross-site-scripting"
+difficulty: "APPRENTICE"
+---
+
+**Laboratorio:** [Lab: DOM XSS in document.write sink using source location.search | Web Security Academy](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-document-write-sink)
+
+- Objetivo:  Explotar una vulnerabilidad de **DOM-based Cross-Site Scripting (XSS)**, provocada por el uso inseguro de `document.write()` con entrada controlada por el usuario a través del objeto `location.search`.
+    
+    ## **Análisis inicial**
+    
+
+Al acceder a la página del laboratorio, se presenta una barra de búsqueda. Se sospecha que los parámetros introducidos en esta búsqueda son reflejados directamente en el DOM, sin mecanismos de sanitización.
+
+## Solución
+
+- **Identificación de punto de entrada**
+    
+    Se utiliza la barra de búsqueda para enviar una cadena aleatoria (`test123`). Al hacerlo, se observa que esta cadena se refleja en la URL como parámetro `search`.
+    
+
+```
+?search=test123
+```
+
+- Análisis del código fuente
+    
+    Al inspeccionar el código fuente del sitio (Ctrl+U), se identifica el siguiente fragmento JavaScript:
+    
+    ![Código fuente del sitio mostrando la función trackSearch con el sink document.write](/writeups/portswigger/3_dom_xss_document_write_sink_location_search/image.png)
+    
+    ```jsx
+    function trackSearch(query) {
+    		document.write('<img src="/resources/images/tracker.gif?searchTerms='+query+'">');
+    	}
+    	var query = (new URLSearchParams(window.location.search)).get('search');
+    	if(query) {
+    	trackSearch(query);
+    	}
+    ```
+    
+    - Función del código
+        
+        Este código rastrea qué buscó un usuario en la URL (parámetro `search`) y envía esa información al servidor mediante una imagen invisible (`tracker.gif`). Sirve para registrar los términos de búsqueda usados por los visitantes.
+        
+    
+    ✅ **Observaciones técnicas:**
+    
+    - El parámetro `search` se obtiene desde `location.search` sin ningún tipo de validación.
+    - Se introduce directamente en `document.write()`, una función vulnerable si se usa con datos no confiables.
+    - Se está generando una etiqueta `<img>` dinámica que incluye el valor ingresado por el usuario. Esto habilita una posible inyección XSS.
+
+- **Inyección del payload**
+    
+    Se prueba la vulnerabilidad utilizando el siguiente payload:
+    
+    ```jsx
+    "><script>alert(1)</script>
+    ```
+    
+    Alternativa con SVG (evade algunos filtros simples):
+    
+    ```jsx
+    "><svg onload=alert(1)>
+    ```
+    
+    Este payload se inserta en el campo de búsqueda, lo cual genera una URL como:
+    
+    ![URL generada con el payload XSS inyectado en el parámetro search](/writeups/portswigger/3_dom_xss_document_write_sink_location_search/image%201.png)
+    
+
+```jsx
+?search="><script>alert(1)</script>
+```
+
+- **Ejecución del payload**
+    
+    Después de enviar la búsqueda, el navegador interpreta el contenido inyectado dentro del `document.write`, resultando en la ejecución del script malicioso:
+    
+    ```html
+    <img src="/resources/images/tracker.gif?searchTerms="><script>alert(1)</script>">
+    ```
+    
+    Esto provoca una alerta del navegador (`alert(1)`), lo que confirma la ejecución del código JavaScript arbitrario.
+    
+
+## ✅ Resultado
+
+La vulnerabilidad fue confirmada: se logró ejecutar JavaScript inyectado desde el parámetro `search`, lo cual representa una **DOM XSS (Reflected)** en el *sink* `document.write()`.
+
+![Alerta de JavaScript ejecutada en el navegador confirmando la explotación exitosa del DOM XSS](/writeups/portswigger/3_dom_xss_document_write_sink_location_search/image%202.png)
+
+📌 **Nota importante:** Aunque el `alert(1)` es común para validación, en un escenario real un atacante podría robar cookies, sesiones o redirigir al usuario a sitios maliciosos.
+
+### 🧠 **Recomendaciones de mitigación**
+
+- Evitar el uso de `document.write()`; utilizar alternativas como DOM APIs seguras (`textContent`, `createElement`, etc.).
+- Validar y sanitizar todos los parámetros provenientes de `location.search` o cualquier fuente controlada por el usuario.
+- Usar librerías como DOMPurify para limpiar HTML dinámico si se requiere insertar contenido generado por el usuario.
