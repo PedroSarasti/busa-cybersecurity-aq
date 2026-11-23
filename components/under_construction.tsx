@@ -48,7 +48,7 @@ export function UnderConstruction({ title, moduleSlug, accent, upcoming = [] }: 
 
           {upcoming.length > 0 && (
             <div className="mt-10 w-full">
-              <p className="text-xs uppercase tracking-wider text-gray-500 mb-4">Lo que viene</p>
+              <p className="text-sm text-gray-400 mb-4">Lo que viene</p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
                 {upcoming.map((sub) => {
                   const SubIcon = sub.icon

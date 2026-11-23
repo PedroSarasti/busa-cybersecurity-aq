@@ -21,7 +21,7 @@ export function getMdxComponents(accentText: string) {
       <h4 className="mt-6 mb-2 text-lg font-semibold text-gray-100 scroll-mt-24" {...props} />
     ),
     p: (props: ComponentProps<"p">) => (
-      <p className="my-4 leading-relaxed text-gray-300" {...props} />
+      <p className="my-5 text-[1.0625rem] leading-[1.75] text-gray-300" {...props} />
     ),
     ul: (props: ComponentProps<"ul">) => (
       <ul className="my-4 ml-6 list-disc space-y-2 text-gray-300 marker:text-gray-500" {...props} />
@@ -42,20 +42,20 @@ export function getMdxComponents(accentText: string) {
     ),
     blockquote: (props: ComponentProps<"blockquote">) => (
       <blockquote
-        className="my-6 border-l-4 border-gray-700 bg-gray-900/50 px-5 py-3 italic text-gray-300"
+        className="my-6 border-l-2 border-red-600/60 bg-gray-900/50 px-5 py-3 text-gray-300"
         {...props}
       />
     ),
     hr: () => <hr className="my-8 border-gray-800" />,
     code: (props: ComponentProps<"code">) => (
       <code
-        className="rounded bg-gray-800 px-1.5 py-0.5 font-mono text-sm text-gray-200"
+        className="rounded-sm border border-gray-700 bg-gray-800 px-1.5 py-0.5 font-mono text-[0.875em] text-gray-100"
         {...props}
       />
     ),
     pre: (props: ComponentProps<"pre">) => (
       <pre
-        className="my-6 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900 p-4 text-sm leading-relaxed [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-gray-200"
+        className="my-6 overflow-x-auto rounded-md border border-gray-800 bg-gray-900 p-4 font-mono text-sm leading-relaxed [&_code]:border-0 [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-gray-200"
         {...props}
       />
     ),
@@ -72,7 +72,7 @@ export function getMdxComponents(accentText: string) {
     ),
     img: (props: ComponentProps<"img">) => (
       // eslint-disable-next-line @next/next/no-img-element
-      <img className="my-6 rounded-lg border border-gray-800" alt={props.alt ?? ""} {...props} />
+      <img className="my-6 rounded-md border border-gray-800" alt={props.alt ?? ""} {...props} />
     ),
   }
 }

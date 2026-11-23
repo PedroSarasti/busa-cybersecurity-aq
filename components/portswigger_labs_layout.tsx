@@ -136,7 +136,7 @@ export function PortswiggerLabsLayout({ articles, accent, basePath, backHref }: 
                   <Link key={article.slug} href={`${basePath}/${article.slug}`} className="group">
                     <Card
                       className={cn(
-                        "bg-gray-900 border-gray-800 transition-all duration-300 hover:shadow-lg",
+                        "bg-gray-900 border-gray-800 transition-all duration-300",
                         accent.cardHover,
                       )}
                     >

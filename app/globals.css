@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
+    --background: 222 30% 4.3%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 216 21% 8%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 216 21% 8%;
     --popover-foreground: 210 40% 98%;
     --primary: 0 72.2% 50.6%;
     --primary-foreground: 210 40% 98%;
@@ -20,8 +20,8 @@
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 215 14% 21%;
+    --input: 215 14% 21%;
     --ring: 0 72.2% 50.6%;
     --radius: 0.75rem;
   }
@@ -33,26 +33,24 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
+  }
+  :focus-visible {
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
   }
 }
 
-/* Estilos personalizados para el tema de ciberseguridad */
-.cyber-glow {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-}
-
-.cyber-text-glow {
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-}
-
-/* Animación para elementos interactivos */
-.cyber-hover {
-  transition: all 0.3s ease;
-}
-
-.cyber-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Scrollbar personalizada */
@@ -61,11 +59,11 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #111827;
+  background: #12161c;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #374151;
+  background: #30363d;
   border-radius: 4px;
 }
 

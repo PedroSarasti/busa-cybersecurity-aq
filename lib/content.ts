@@ -189,3 +189,25 @@ export function hasContent(section: string, subsections: string[], subsection?: 
   const slugs = subsection ? [subsection] : subsections
   return slugs.some((sub) => getArticles(section, sub).length > 0)
 }
+
+/** Artículo con la ruta a la que pertenece (para listados globales como el home). */
+export interface LocatedArticle extends ArticleMeta {
+  section: string
+  subsection: string
+}
+
+/** Todos los artículos publicados de las subsecciones indicadas, del más reciente al más antiguo. */
+export function getLatestArticles(
+  locations: { section: string; subsections: string[] }[],
+  limit = 6,
+): LocatedArticle[] {
+  const all: LocatedArticle[] = []
+  for (const { section, subsections } of locations) {
+    for (const subsection of subsections) {
+      for (const article of getArticles(section, subsection)) {
+        all.push({ ...article, section, subsection })
+      }
+    }
+  }
+  return all.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)).slice(0, limit)
+}

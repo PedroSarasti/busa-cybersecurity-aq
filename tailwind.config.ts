@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss"
+import defaultTheme from "tailwindcss/defaultTheme"
 
 const config: Config = {
   darkMode: ["class"],
@@ -20,7 +21,25 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", ...defaultTheme.fontFamily.sans],
+        mono: ["var(--font-mono)", ...defaultTheme.fontFamily.mono],
+      },
       colors: {
+        // Escala de grises propia (fría, con contraste AA para texto secundario).
+        gray: {
+          50: "#f6f8fa",
+          100: "#eaeef2",
+          200: "#dde3ea",
+          300: "#bcc4cd",
+          400: "#8b949e",
+          500: "#7d8590",
+          600: "#545d68",
+          700: "#30363d",
+          800: "#1c2128",
+          900: "#12161c",
+          950: "#07090d",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -83,10 +102,13 @@ const config: Config = {
           },
         },
       },
+      // Un solo radio para tarjetas y controles; rounded-full queda para chips.
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: "0.25rem",
+        md: "0.375rem",
+        lg: "0.375rem",
+        xl: "0.375rem",
+        "2xl": "0.375rem",
       },
       keyframes: {
         "accordion-down": {

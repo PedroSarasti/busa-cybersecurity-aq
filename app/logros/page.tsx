@@ -24,8 +24,7 @@ export default function LogrosPage() {
               <ArrowLeft className="size-4" />
               Volver a Sobre mí
             </Link>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-red-400">Sala de trofeos</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Logros</h1>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Logros</h1>
             <p className="mt-2 text-sm text-gray-400">
               Certificaciones, diplomas, competencias y reconocimientos · {achievements.length} logros
             </p>

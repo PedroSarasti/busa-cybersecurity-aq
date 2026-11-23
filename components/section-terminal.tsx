@@ -62,7 +62,7 @@ export function SectionTerminal({ moduleName, items, accentText, accentDot }: Se
   const done = visibleLines >= lines.length
 
   return (
-    <div className="mx-auto w-full max-w-2xl overflow-hidden rounded-xl border border-gray-800 bg-gray-950/90 shadow-2xl">
+    <div className="mx-auto w-full max-w-2xl overflow-hidden rounded-xl border border-gray-800 bg-gray-950/90">
       {/* Barra de título */}
       <div className="flex items-center gap-2 border-b border-gray-800 bg-gray-900/80 px-4 py-2.5">
         <span className="h-3 w-3 rounded-full bg-red-500/80" />

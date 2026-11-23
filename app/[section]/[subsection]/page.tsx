@@ -108,57 +108,38 @@ export default async function SubSectionPage({
       <section className="py-16 px-4 flex-1">
         <div className="container mx-auto">
           {articles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ul className="mx-auto max-w-4xl divide-y divide-gray-800 border-y border-gray-800">
               {articles.map((article) => (
-                <Link
-                  key={article.slug}
-                  href={`${section.href}/${subsection.slug}/${article.slug}`}
-                  className="group"
-                >
-                  <Card
-                    className={cn(
-                      "h-full bg-gray-900 border-gray-800 transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
-                      accent.cardHover,
-                      accent.glow,
-                    )}
+                <li key={article.slug}>
+                  <Link
+                    href={`${section.href}/${subsection.slug}/${article.slug}`}
+                    className="group block py-5 transition-colors hover:bg-gray-900/60"
                   >
-                    <CardHeader>
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                        <CalendarDays className="h-3.5 w-3.5" />
-                        <time dateTime={article.date}>{formatDate(article.date)}</time>
+                    <time dateTime={article.date} className="font-mono text-xs text-gray-500">
+                      {formatDate(article.date)}
+                    </time>
+                    <h2 className={cn("mt-1 text-lg font-semibold text-white transition-colors", accent.titleHover)}>
+                      {article.title}
+                    </h2>
+                    {article.description && (
+                      <p className="mt-1 text-gray-400 leading-relaxed line-clamp-2">{article.description}</p>
+                    )}
+                    {article.tags.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {article.tags.slice(0, 4).map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full border border-gray-800 px-2.5 py-0.5 font-mono text-xs text-gray-400"
+                          >
+                            {tag}
+                          </span>
+                        ))}
                       </div>
-                      <CardTitle className={cn("text-white transition-colors", accent.titleHover)}>
-                        {article.title}
-                      </CardTitle>
-                      <CardDescription className="text-gray-400 leading-relaxed line-clamp-3">
-                        {article.description}
-                      </CardDescription>
-                      {article.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 pt-3">
-                          {article.tags.slice(0, 4).map((tag) => (
-                            <span
-                              key={tag}
-                              className="rounded-full border border-gray-800 bg-gray-950 px-2.5 py-0.5 text-xs text-gray-400"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5 pt-4 text-sm font-medium transition-colors",
-                          accent.text,
-                        )}
-                      >
-                        Leer artículo
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      </span>
-                    </CardHeader>
-                  </Card>
-                </Link>
+                    )}
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           ) : (
             <div className="flex flex-col items-center justify-center text-center py-20 rounded-xl border border-dashed border-gray-800 bg-gray-900/30">
               <FileText className="h-12 w-12 text-gray-700 mb-4" />
