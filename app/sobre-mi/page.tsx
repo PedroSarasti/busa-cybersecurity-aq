@@ -24,7 +24,6 @@ import {
 } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { CvDownload } from "@/components/cv-download"
 import { FeaturedAchievements } from "@/components/achievements_grid"
 import { getAchievements } from "@/lib/achievements_files"
 import Image from "next/image"
@@ -174,7 +173,6 @@ export default function SobreMiPage() {
                 </span>
               </div>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-6">
-                <CvDownload />
                 <Button
                   variant="outline"
                   className="border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
