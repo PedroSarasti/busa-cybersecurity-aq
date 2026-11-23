@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { ExpandableGrid } from "@/components/expandable_grid"
 import { sections } from "@/lib/navigation"
 import { getLatestArticles } from "@/lib/content"
 
@@ -18,8 +17,7 @@ function formatDate(date: string): string {
 export default function HomePage() {
   // Secciones de contenido (excluye Inicio y Sobre mí).
   const categories = sections.filter((s) => s.slug !== "inicio" && s.slug !== "sobre-mi")
-  const visibleCategories = categories.slice(0, 3)
-  const moreCategories = categories.slice(3)
+  const mainCategories = categories.slice(0, 3)
 
   // Últimos artículos reales leídos de /content (3 son suficientes).
   const latest = getLatestArticles(
@@ -83,10 +81,8 @@ export default function HomePage() {
       {/* Categorías: tres a la vista y un botón para el resto */}
       <section className="py-16 px-4 bg-gray-900">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">Explora por Categoría</h2>
-          <ExpandableGrid extra={moreCategories.map(renderCategory)} label="Ver todas las categorías">
-            {visibleCategories.map(renderCategory)}
-          </ExpandableGrid>
+          <h2 className="text-3xl font-bold text-white text-center mb-12">Categorías Principales</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">{mainCategories.map(renderCategory)}</div>
         </div>
       </section>
 
